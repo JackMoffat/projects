@@ -1,0 +1,72 @@
+ls
+vi main.rs
+rustc
+ls
+ll
+l
+vi main.rs 
+rustc main.rs 
+l
+./main 
+git status
+git add .
+gh
+gh repo create 
+ls
+cd ..
+ls
+cd rust/
+l
+rm -rf .git
+cd ...
+cd ..
+l
+vi .gitignore
+git init
+git branch -m main
+git status
+vi .gitignore 
+git status
+git status
+git status
+vi .gitignore 
+git status
+vi .gitignore 
+git status
+vi .gitignore 
+git status
+vi .gitignore 
+git status
+l
+git status
+vi .gitignore 
+git status
+git add .
+git status
+git commit -m "add rust project"
+;
+l
+gh
+gh repo create
+git remote -v
+git remote set-url origin git@github.com:/JackMoffat/projects.git
+git remot e-v
+git remote -v
+git status
+git push
+git push --set-upstream origin main 
+direnv allow
+ls
+ll
+l
+cd rust/
+direnv allow
+rustup component add rls --toolchain nightly-2021-09-19-x86_64-unknown-linux-gnu
+ls
+nixify
+which cargo
+exit
+vi shell.nix 
+exit
+cargo
+which cargo
