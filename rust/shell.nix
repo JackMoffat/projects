@@ -2,6 +2,8 @@
 
   pkgs.mkShell rec {
     buildInputs = with pkgs; [
+      rustc
+      cargo
       llvmPackages_latest.llvm
       llvmPackages_latest.bintools
       zlib.out
