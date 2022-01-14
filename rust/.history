@@ -70,3 +70,20 @@ vi shell.nix
 exit
 cargo
 which cargo
+cargo
+cargo new
+cargo new test
+cargo new testy
+ls
+l
+rm testy/
+rm -rf testy/
+ls
+l
+cargo new guessing_game
+ls
+l
+cd guessing_game/ 
+l
+which cargo
+which rls 

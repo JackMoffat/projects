@@ -18,8 +18,12 @@
     # https://github.com/rust-lang/rust-bindgen#environment-variables
     LIBCLANG_PATH= pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_latest.libclang.lib ];
     HISTFILE=toString ./.history;
+    # I added the export cargo line below
+    # the export PATH should fail. but wait, now I do have a .cargo?
+    # for some reason, I now *do* have a ~/.cargo directory. 
+    # If I still get no rls, try "export rls=$(which rls)"
     shellHook = ''
-      export cargo=$(which cargo)
+      export PATH=$PATH:~/.cargo/bin
       export PATH=$PATH:~/.rustup/toolchains/$RUSTC_VERSION-x86_64-unknown-linux-gnu/bin/
       '';
     # Add libvmi precompiled library to rustc search path
