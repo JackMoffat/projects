@@ -1,0 +1,235 @@
+ah, this is nifty - I can also specify different files to tangle to without needing to have the "code" stuff
+** 3.1 - variables and mutability ("shadowing")
+   :PROPERTIES:
+   :header-args:rust: :tangle ./src/main.rs
+   :END:
+*** constants
+  - not the same thing as variables
+  - can't use =mut= with constants once they are defined
+  - and require you to define the =type= at the outset - because there is no other time to, nor can they be assigned a type by inference?
+  - convention is ALL_UPPER_CASE
+  - oh! and constants have to be set in a way that can be computed before compilation
+  - very useful to use constants for hardcoded values, so that you don't have to look through the code for wherever else it is listed
+     
+   #+name: start_main
+   #+begin_src rust
+     fn main() {
+   #+end_src
+    #+name: main-block
+    #+begin_src rust 
+      const THREE_HOURS_IN_SECONDS: u32 = 60 *  60 * 3;
+      println!("3 hr in sec is {}", THREE_HOURS_IN_SECONDS);
+    #+end_src
+    
+*** Shadowing 
+    - so, shadowing is incredibly useful
+    - by repeating the let x statement ln33, you're now shadowing x=5 within the same scope
+    - but then within the curly braces, the let statement is =shadowing= the outer scope's x
+    - so, for commands issued within the inner scope the value accessed by ~x~ is different than outer
+    - "by using let, we can perform a few transformations on a value but have the variable be immutable after those transformations have been competed"
+    - the other nifty difference between shadowing and ~mut~ is that you can reuse variable names -> handy when the variable's value must be transformed to some other state
+    #+begin_src rust
+      let x = 5;
+      let x = x + 1;
+
+      // so here we're starting a new scope
+
+      {
+          let x = x * 2;
+          println!("fuck fuck FUCK ME AAAAHHHHH: {}", x)
+      }
+
+      println!("The value x is: {}", x);
+
+
+      let spaces = "  "; // here, spaces is at first a string
+      let spaces = spaces.len(); // now, spaces is an int
+    #+end_src
+    
+*** issue with let mut
+    - this produces an error
+    - so, whats interesting here is that ~mut~ allows variables to change value within their type but doesn't let them change their type
+  #+begin_src rust
+    let mut spaces = "  ";
+    // spaces = spaces.len();
+    #+end_src
+     
+** 3.2 - data types
+   :PROPERTIES:
+   :header-args:rust: :tangle ./src/main.rs
+   :END:
+   - rust is "statically typed" - the types of all variables must be known at compile time
+   - here we look at two subsets of data types: scalar types and compound types
+*** inference
+    - compiler can usually infer type, but when it isn't possible to infer we add a type annotation
+    #+begin_src rust
+      let guess: u32 = "42".parse().expect("no es numero!");
+      #+end_src
+*** scalar types
+    - Scalar types represent single values
+    - there are 4 primary types:
+**** 1. integers
+     - theyre...integers. Different primary types
+     | length  | signed | unsigned |
+     |---------+--------+----------|
+     | 8-bit   | i8     | u8       |
+     | 16-bit  | i16    | u16      |
+     | 32-bit  | i32    | u32      |
+     | 64-bit  | i64    | u64      |
+     | 128-bit | i128   | u128     |
+     | arch    | isize  | usize    |
+     - signed/unsigned specifies whether they can be negative or not
+     - further reading on signed numbers: [[https://en.wikipedia.org/wiki/Two%27s_complement][Two's complement - Wikipedia]]
+     - ~isize~ and ~usize~ refer to the computers architecture, which is either 32 or 64 bit....for NOW
+     - integer....literals? what exactly do they mean by literals?
+     - integer literals can be of many different types, and for legibility they can be underscore separated
+     | number literals | example     |
+     |-----------------+-------------|
+     | decimal         | 98_222      |
+     | hex             | 0xff        |
+     | octal           | 0o77        |
+     | binary          | 0b1111_0000 |
+     | Byte(~u8~ only) | b'A'        |
+     - so, hex, octal, and binary are all accessed by 0<x,o,b><number> respectively
+***** integer overflow
+      - if some number goes outside what a value can hold, then you'd get an integer overflow
+      - Ah, if you're compiling in debug you get an exit with a panic but if you're compiling in release mode, there's no panic and the number is /wrapped/ with two's complement
+      - you can explicitly handle overflows swith methods in ~wrapping_,checked_,overflowing_,saturating_~
+**** 2. floating-point numbers
+     - only two types, f32 and f64
+     - default is f64 b/c computationally it's chill now bro
+     - f32, 64 have single, double precision floats respectively
+     #+begin_src rust
+       let x = 2.0; // f64
+       let y: f32 = 3.0; // f64
+     #+end_src
+**** numerical operations
+     - can be done as expected, mainly
+     - integer division rounds down
+     - can't combine floating point and int operations (directly)
+     - examples are below
+     #+begin_src rust
+       // addition
+       let sum = 5 + 10;
+
+       // subtraction
+       let difference = 95.5 - 4.3;
+
+       // multiplication
+       let product = 4 * 30;
+
+       // division
+       let quotient = 56.7 / 32.2;
+       let floored = 2 / 3; // Results in 0
+
+       // remainder
+       let remainder = 43 % 5;
+     #+end_src
+**** 3. booleus caesar
+     - booleans are of type ~bool~
+     - as expected, there's two of them ~true~ and ~false~
+     - nifty, they're only one byte in size
+     - generally employed in conditional expressions
+**** 4. the character type
+     - important to note:
+     - ~char~ are specified with 'single quotes'
+     - as opposed to ~string~, which are specified w/ "double quotes"
+     - size: 4 bytes that represent a unicode scalar value!!!
+     - AKA, more than ASCII!
+     - unicode scalars range in ~[U+0000, U+D7FF]u[U+E000,U+10FFFF]~
+     - ref ch. 8
+*** Compound types
+**** Tuples
+     - we covered this a bit in 'rust by example'
+     - tuples can group varieties of types
+       #+begin_src rust
+         let tup: (i32, f64, u8) = (500,6.4,1); // explicit type annotation
+         let tup = (500,6.4,1); // infers type
+       #+end_src
+***** Pattern matching and destructuring
+      #+begin_src rust
+        let (x, y, z) = tup; // in this way, the three values of tuple are extracted
+        println!("so now I can print y: {}",y);
+      #+end_src
+***** direct access
+      #+begin_src rust
+        // tuple values can be accessed by dot annotation
+        let x: (i32, f64, u8) = (500, 6.4, 1);
+
+        let five_hundred = x.0;
+
+        let six_point_four = x.1;
+
+        let one = x.2;
+      #+end_src
+***** the weird special tuple "unit tuple"
+      - the type w/ no values is ~()~
+      - this is called the /unit type/, and the value is the /unit value/
+      - if expressions don't return any value, what they return is implicitly the unit value
+        - this is probably useful for the actaul implementation of the code at a lowe level?
+**** Arrays
+      - one big difference is that the values in arrays must all have the same type
+      - additionally, arrays have fixed length unlike python
+      - arrays become useful when yo want your data to be stored on the *stack*, instead of the *heap* <- ref ch.4
+      - also useful when you want to ensure something has a fixed number of elements
+      - arrays are rather inflexible, however. The more flexible =vector= type is what should be used if it isn't clear that an array is the best choice. <- ref ch. 8
+        - will be discussed much more in ch. 8
+        - vectors can grow and shrink
+      - arrays are great for when elements don't need to change
+#+begin_src rust
+  let a = [1, 2, 3, 4, 5]; // inferred type
+
+  let first_3_months = ["jan", "feb", "march"];
+
+  // writing the type of the array and the number of elements
+  let a: [i32;5] = [1,2,3,4,5];
+
+  // initializing an array - concise formatting
+  let a = [3;5]; // the same as let a = [3,3,3,3,3]
+#+end_src
+
+***** Accessing array elements
+      - elements of arrays can be accessed by indexing
+      -
+      #+begin_src rust
+        let a = [1,2,3,4,5];
+
+        let first = a[0];
+        let second = a[1];
+      #+end_src
+
+       
+***** arrays invalid access
+      #+begin_src rust
+        use std::io;
+        let a = [1, 2, 3, 4, 5];
+
+        println!("Please enter an array index.");
+
+        let mut index = String::new();
+
+        io::stdin()
+            .read_line(&mut index)
+            .expect("Failed to read line");
+
+        let index: usize = index
+            .trim()
+            .parse()
+            .expect("Index entered was not a number");
+
+        let element = a[index];
+
+        println!(
+            "The value of the element at index {} is: {}",
+            index, element
+        );
+      #+end_src
+
+      - this code compiles just fine, but has the vulernability that it requests input and that input could be out of bounds
+      - result of this will be a runtime error -> won't run the final println! statementa
+      - this is one of the safety features of rust -> many languages don't provide thsi check, and so different bits of memory can be accessed in that case -> hackers oh no l337
+      #+name: end_main
+      #+begin_src rust 
+        }
+      #+end_src
+    

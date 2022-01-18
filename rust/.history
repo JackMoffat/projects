@@ -87,3 +87,48 @@ cd guessing_game/
 l
 which cargo
 which rls 
+cargo build
+cargo build
+cargo update -p libc
+cargo update 
+cargo update -v
+cargo --help
+l
+cd ..
+l
+cd ..
+l
+l
+ln -s rust-toolchain rustBookCh2/guessing_game/
+cd rustBookCh2/guessing_game/
+l
+cargo build
+l
+vi rust-toolchain 
+rm rust-toolchain 
+ln -s ../../rust-toolchain ./rust-toolchain
+l
+cargo build
+cat rust-toolchain 
+exit
+l
+cargo build
+l
+./guessing_game
+11
+./guessing_game
+./guessing_game
+./guessing_game
+./guessing_game
+./guessing_game
+./guessing_game
+./guessing_game
+./guessing_game 
+l
+vi shell.nix 
+which cargo
+which cargo | 's/bin\/cargo/bin\//'
+which cargo | sed -n 's/bin\/cargo/bin\//p'
+which rust
+./rustBookCh3 
+./rustBookCh3 
