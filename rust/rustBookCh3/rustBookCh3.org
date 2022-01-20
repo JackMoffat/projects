@@ -233,3 +233,125 @@ ah, this is nifty - I can also specify different files to tangle to without need
         }
       #+end_src
     
+
+** 3.3 - functions
+   :PROPERTIES:
+   :header-args:rust: :tangle ./functions/src/main.rs
+   :END:
+   - main is the "entry point" of many programs
+   - functions are declared by ~fn <name>(<parameters>) {<body>}
+   - functions referenced in main can be defined /further/ down in the main.rs file! as well as before if you want. Rust don't give a fuck
+  
+   
+*** Parameters / Arguments
+    #+begin_src rust
+      fn main() {
+          another_fungus(5);
+      }
+
+      fn another_fungus(x: i32) {
+          println!("x is {}",x)
+      }
+    #+end_src
+    - arguments defined in function "signatures" must have their types declared too.
+    - the upshot of this is that you rarely need to use the types elsewhere(?)
+    - 
+
+**** multiple parameters
+#+begin_src rust
+  fn main() {
+      print_labeled_measurements(5,'h');
+  }
+  fn print_labeled_measurements(value: i32, unit_label:char) {
+      println!("REEEEEEEEEEEEEEE: {}{}",value, unit_label);
+
+  }
+#+end_src
+
+**** statements and expressions
+     - function bodies are "series of statements optionally ending in an expression
+     - statements: perform some action, do not return a value
+       - creating a variable and assigning a value to it with let is a statement
+       - function definitions are also statements
+       - but! since statements don't return values you can't do something like a nested let statement
+       ~let x = (let y = 6);}~
+       - since ~let y= 6~ doesn't return a value, ~let x~ has nothing to bind to.
+     - expressions: evaluate to a value
+       - most of the rust code that you'll write is expressions
+       - *calling* a function is an expressio, as is calling a macro
+         - 
+#+begin_src rust
+  let y = {
+      let x = 3; // statement!!!
+      x + 1 // expression 
+  };
+#+end_src
+so basically, any line that ends in a semicolon doesn't OF ITSELF immediately return a value
+
+*** Functions with return values
+    - in rust, return values are not named.
+    - their types are declared with arrow
+    - return val of a function is equal to the value of the final *expression* in the fn body
+    - you can return early using ~return <val>~
+    #+begin_src rust
+      fn five() -> i32{
+          5
+      }
+
+      fn main() {
+          let x = five();
+          println!("x is {}",x); // see, technically a statement but since it is a macro....something something
+      }
+    #+end_src
+
+
+*** the rest of 3.3 is showing how putting semicolons causes a lack of a return value
+
+** 3.4 - comments
+   - there are no multi-line comments
+   - can be put wherever
+   - typically put above the line they relate to, as opposed to at the end of the line
+   - apparently docstring comments are a  a thing, but we wont talk about that now huh huh
+
+** 3.5 - control flow
+   :PROPERTIES:
+   :header-args:rust: :tangle ./branches/src/main.rs
+   :END:
+   - here we go, ~if~ expressions and loops
+*** open main
+    #+begin_src rust
+      fn main() {
+    #+end_src
+*** ~if~ expressions
+    - so, the else between clauses of the ~if~ expression is done on the same line - sandwichy-style
+    #+begin_src rust
+      let number = 3;
+
+      if number < 5 {
+          println!("truh");
+      } else {
+          println!("falsss");
+      }
+    #+end_src
+    - blocks of code in ~if~ expressions are called *arms*, like in ~match~ expressions
+    - in the above example, at least, ~if~ statements MUST evaluate to a =bool=.
+    - this is unlike python. in python if you had said ~let x = 3~ and then ~if x~, you'd get a =true= value back.
+    - the ~if~ condition must always be explicitly given a boolean type
+*** ~else if~
+    - rust handles multiple clauses by stating ~else if~ between clauses
+    - ~if~ conditions are evaluated sequentially, and then exits on the first true condition
+    - "if you have more than one ~else if~ statement, you might want to refactor your code" <- then references the ~match~ thinger in ch.6 for this case
+*** ~if~ in ~let~ statements
+    - nifty - one-line ~if~ can be used in ~let~ by having space-padded curly braces.
+    #+begin_src rust
+      let condition = true;
+      let number = if condition { 5 } else { 6 };
+      println!("value es {}",number)
+    #+end_src
+*** close main
+    #+begin_src rust
+      }
+    #+end_src
+    
+
+    

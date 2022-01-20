@@ -23,9 +23,11 @@
     # for some reason, I now *do* have a ~/.cargo directory. 
     # If I still get no rls, try "export rls=$(which rls)"
     # create a path for the command run by cargo build
+    # may need extra variable in the elisp form for rls, but may be fixed by "which rls"
     shellHook = ''
       echo "((nil . ((cargo-process--custom-path-to-bin . \"$(which cargo)\"))))" > .dir-locals.el
 
+      export rls=$(which rls)
       export PATH=$PATH:~/.cargo/bin
       export PATH=$PATH:~/.rustup/toolchains/$RUSTC_VERSION-x86_64-unknown-linux-gnu/bin/
       '';
