@@ -233,7 +233,6 @@ ah, this is nifty - I can also specify different files to tangle to without need
         }
       #+end_src
     
-
 ** 3.3 - functions
    :PROPERTIES:
    :header-args:rust: :tangle ./functions/src/main.rs
@@ -313,45 +312,128 @@ so basically, any line that ends in a semicolon doesn't OF ITSELF immediately re
    - typically put above the line they relate to, as opposed to at the end of the line
    - apparently docstring comments are a  a thing, but we wont talk about that now huh huh
 
+     
 ** 3.5 - control flow
-   :PROPERTIES:
-   :header-args:rust: :tangle ./branches/src/main.rs
-   :END:
-   - here we go, ~if~ expressions and loops
-*** open main
-    #+begin_src rust
-      fn main() {
-    #+end_src
-*** ~if~ expressions
-    - so, the else between clauses of the ~if~ expression is done on the same line - sandwichy-style
-    #+begin_src rust
-      let number = 3;
+*** 3.5.1 - if
+    :PROPERTIES:
+    :header-args:rust: :tangle ./branches/src/main.rs
+    :END:
+    - here we go, ~if~ expressions and loops
+**** open main
+     #+begin_src rust
+       fn main() {
+     #+end_src
+**** ~if~ expressions
+     - so, the else between clauses of the ~if~ expression is done on the same line - sandwichy-style
+     #+begin_src rust
+       let number = 3;
 
-      if number < 5 {
-          println!("truh");
-      } else {
-          println!("falsss");
-      }
-    #+end_src
-    - blocks of code in ~if~ expressions are called *arms*, like in ~match~ expressions
-    - in the above example, at least, ~if~ statements MUST evaluate to a =bool=.
-    - this is unlike python. in python if you had said ~let x = 3~ and then ~if x~, you'd get a =true= value back.
-    - the ~if~ condition must always be explicitly given a boolean type
-*** ~else if~
-    - rust handles multiple clauses by stating ~else if~ between clauses
-    - ~if~ conditions are evaluated sequentially, and then exits on the first true condition
-    - "if you have more than one ~else if~ statement, you might want to refactor your code" <- then references the ~match~ thinger in ch.6 for this case
-*** ~if~ in ~let~ statements
-    - nifty - one-line ~if~ can be used in ~let~ by having space-padded curly braces.
-    #+begin_src rust
-      let condition = true;
-      let number = if condition { 5 } else { 6 };
-      println!("value es {}",number)
-    #+end_src
-*** close main
-    #+begin_src rust
-      }
-    #+end_src
-    
+       if number < 5 {
+           println!("truh");
+       } else {
+           println!("falsss");
+       }
+     #+end_src
+     - blocks of code in ~if~ expressions are called *arms*, like in ~match~ expressions
+     - in the above example, at least, ~if~ statements MUST evaluate to a =bool=.
+     - this is unlike python. in python if you had said ~let x = 3~ and then ~if x~, you'd get a =true= value back.
+     - the ~if~ condition must always be explicitly given a boolean type
+**** ~else if~
+     - rust handles multiple clauses by stating ~else if~ between clauses
+     - ~if~ conditions are evaluated sequentially, and then exits on the first true condition
+     - "if you have more than one ~else if~ statement, you might want to refactor your code" <- then references the ~match~ thinger in ch.6 for this case
+**** ~if~ in ~let~ statements
+     - nifty - one-line ~if~ can be used in ~let~ by having space-padded curly braces.
+     #+begin_src rust
+       let condition = true;
+       let number = if condition { 5 } else { 6 };
+       println!("value es {}",number)
+     #+end_src
+**** close main
+     #+begin_src rust
+       }
+     #+end_src
+*** 3.5.2 - loops
+    :PROPERTIES:
+    :header-args:rust: :tangle ./loops/src/main.rs
+    :END:
+**** open main
+     #+begin_src rust
+       fn main() {
+       #+end_src
+**** repetition n loops 
+     #+begin_src rust
+       let mut count = 0;
+       // naming a loop!
+       'counting_up: loop {
+           println!("count={}",count);
+           let mut remaining = 10;
 
-    
+
+           loop {
+               println!("remaining = {}",remaining);
+               if remaining == 9 {
+                   break;
+               }
+               if count == 2 {
+                   break 'counting_up;
+               }
+               remaining -= 1;
+           }
+
+           count += 1;
+       }
+       println!("end count = {}", count);
+     #+end_src
+     - so, if you just write ~loop { }~, no exit unless ctrl-c
+     - woah, interesting syntax on line 2: allows for labelling loops!
+     - labelled loops are very nice.
+     - this is pretty similar to what I already have seen otherwise
+     - because loops are expressions, no semicolon after
+**** returning values from loops
+     - loops can be good for operations you might fail - ex, check whether internet is connected yet or if a process has finished
+     - cool! - after the break statement in a loop, you can specify a value to be returned
+     #+begin_src rust
+       let mut counter = 0;
+       let result = loop {
+           counter += 1;
+
+           if counter == 10 {
+               break counter * 2;
+           }
+       }; // here semicolon at the end of the loop because it is being used in a let statement
+       println!("result esta {}",result);
+     #+end_src
+**** conditional loops using ~while~
+     - ~while~ is basically a combination of ~loop,if,else,break~ statements. Thankfully these have been combined!
+      #+begin_src rust
+        let mut number = 3;
+        while number != 0 {
+            println!("{}!",number);
+            number -= 1;
+        }
+        println!("lift muh!");
+      #+end_src
+**** conditional loops using ~for~
+     - ~while~ loops can be error-prone in that they will panic if for example a counter for 6 repetitions tries to run through a 5-element array
+     #+begin_src rust
+       let a = [10, 20, 30, 40, 50];
+       let mut index = 0;
+       while index < 5 {
+           //ok cool! so here, index is counting and used to access sequential elements of the array a
+           println!("the value is {}",a[index]); 
+           index += 1;
+       }
+     #+end_src
+     - as written this code will work, but changing the statement to index <6 will throw error
+     - it /will compile/, but it will then throw errors. Example of this would be asking for user input in some way that then uses it as a boundary
+     #+begin_src rust
+       for shitfucker in a {
+           println!("uhh what? {},"shitfucker);
+       }
+     #+end_src
+**** close main
+     #+begin_src rust
+       }
+ #+end_src
+ 

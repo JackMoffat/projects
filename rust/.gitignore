@@ -1,3 +1,5 @@
 .direnv
 .direnv/**
 **/target/**
+# ignore .dir-locals.el so that correct nix-store path found for cargo
+**/.dir-locals.el
