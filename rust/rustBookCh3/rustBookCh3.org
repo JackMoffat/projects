@@ -1,8 +1,9 @@
-ah, this is nifty - I can also specify different files to tangle to without needing to have the "code" stuff
 ** 3.1 - variables and mutability ("shadowing")
    :PROPERTIES:
    :header-args:rust: :tangle ./src/main.rs
    :END:
+   ah, this is nifty - I can also specify different files to tangle to without needing to have the "code" stuff
+   - what did I mean here? I know it was quite complicated before, so this way is much better
 *** constants
   - not the same thing as variables
   - can't use =mut= with constants once they are defined
@@ -20,7 +21,6 @@ ah, this is nifty - I can also specify different files to tangle to without need
       const THREE_HOURS_IN_SECONDS: u32 = 60 *  60 * 3;
       println!("3 hr in sec is {}", THREE_HOURS_IN_SECONDS);
     #+end_src
-    
 *** Shadowing 
     - so, shadowing is incredibly useful
     - by repeating the let x statement ln33, you're now shadowing x=5 within the same scope
@@ -303,7 +303,7 @@ so basically, any line that ends in a semicolon doesn't OF ITSELF immediately re
       }
     #+end_src
 
-
+    
 *** the rest of 3.3 is showing how putting semicolons causes a lack of a return value
 
 ** 3.4 - comments
@@ -312,7 +312,6 @@ so basically, any line that ends in a semicolon doesn't OF ITSELF immediately re
    - typically put above the line they relate to, as opposed to at the end of the line
    - apparently docstring comments are a  a thing, but we wont talk about that now huh huh
 
-     
 ** 3.5 - control flow
 *** 3.5.1 - if
     :PROPERTIES:
@@ -323,7 +322,7 @@ so basically, any line that ends in a semicolon doesn't OF ITSELF immediately re
      #+begin_src rust
        fn main() {
      #+end_src
-**** ~if~ expressions
+**** [#A] ~if~ expressions
      - so, the else between clauses of the ~if~ expression is done on the same line - sandwichy-style
      #+begin_src rust
        let number = 3;
@@ -428,12 +427,124 @@ so basically, any line that ends in a semicolon doesn't OF ITSELF immediately re
      - as written this code will work, but changing the statement to index <6 will throw error
      - it /will compile/, but it will then throw errors. Example of this would be asking for user input in some way that then uses it as a boundary
      #+begin_src rust
-       for shitfucker in a {
-           println!("uhh what? {},"shitfucker);
+       for elem in a {
+           println!("uhh what? {},"elem);
        }
      #+end_src
 **** close main
      #+begin_src rust
        }
  #+end_src
- 
+** Summary
+*** Exercises
+    :PROPERTIES:
+    :header-args:rust: :tangle ./exercises/src/main.rs
+    :END:
+    build programs that do the following
+**** DONE 1. convert temperatures between Celsius and Fahrenheit
+     CLOSED: [2022-01-24 Mon 09:52]
+     :LOGBOOK:
+     - Note taken on [2022-01-23 Sun 10:14] \\
+       ok, so build some pseudocode first?
+     :END:
+     hmm. I'm getting error no override and no default chain set. I got this once before, how did I fix it?
+     Ah. fix by ~lsp-workspace-folders-remove~ and removed all of them. this allowed me to select the project root interactiveky againm, and it worked.
+     - well, ok. first I wanted to do this by intaking a string and splitting it, but since that doesn't seem to be on the menu i'll just do it was a 2-stage menu process
+     #+begin_src rust
+       use std::io;
+
+       fn main() {
+
+           convert_temperature();
+
+       }
+     #+end_src
+     #+begin_src rust
+       fn convert_temperature() {
+           // current status of this bad boy is that it'll work (ish) if given correct unit at the outset, but will
+           // not if given teh correct unit after an incorrect guess.
+           // this is somehow due to stdin and &mut saving the info of what user_unit is in the loop somehow
+           // will retunr to 
+           const RATIO_DEG_F_PER_C: f32 = 2.12;
+           // displayed instructions
+           loop {
+               // create variable to hold user input
+               let mut user_temperature = String::new();
+               let mut user_unit = String::new();
+               // get user input and ...mutate or shadow it here when it is returned? or, does neither happen because it was made with just String::new(?)
+               println!("temperature?");
+               io::stdin().read_line(&mut user_temperature).expect("expect....?");
+
+               let user_unit = loop {
+                   println!("Celsius(C) or fahrenheit?(F)");
+                   io::stdin().read_line(&mut user_unit).expect("expect....?");
+                   println!("user unit {}",user_unit);
+                   let user_unit_internal = user_unit.trim();
+                   if user_unit_internal == "C" || user_unit_internal == "F" {
+                       println!("user unit internal success is {}", user_unit_internal);
+                       break user_unit_internal; }
+                   else {
+                       println!("try again ya dingus");
+                       continue;
+                   };
+
+               };
+
+               // from looking at guessing_game
+               // weird, adding the trim() was all it took to make this thing work
+               // it makes it look like an int is returned, but the math shows that it is getting it as an f32
+               let user_temperature: f32 = match user_temperature.trim().parse() {
+                   Ok(num) => num,
+                   Err(_) => continue,
+               };
+               let user_converted_temperature: f32 = if user_unit == "C" { user_temperature * RATIO_DEG_F_PER_C } else {user_temperature / RATIO_DEG_F_PER_C};
+               // i got the {:.3 syntax by searching google, we encountered it in the rust by exampe}
+               println!("input is currently {}\nconverted temperature:{:.3}",user_temperature,user_converted_temperature);
+               break;
+           };
+       }
+
+     #+end_src
+**** DONE 2. generate the nth Fibonacci number
+     CLOSED: [2022-01-24 Mon 11:44]
+     #+begin_src rust
+       use std::io;
+
+       fn main() {
+           // so, looping function that adds the numbers is what will end up returning it. so, main will act almost like a wrapper
+
+
+           loop {
+               let mut n = String::new();
+
+               println!("Enter a number");
+               io::stdin().read_line(&mut n).expect("expect....?");
+               let n: u32 = match n.trim().parse() {
+                   Ok(num) => num,
+                   Err(_) => continue,
+               };
+               generate_fibonacci(n);
+               break;
+           }
+       }
+
+       fn generate_fibonacci(n: u32) {
+           let mut f_minus_2: u32 = 0;
+           let mut f_minus_1: u32 = 0;
+
+           let mut fib: u32 = 0;
+           for i in  0..n+1 {
+               if i > 1 {
+            // increment each of their values
+                   f_minus_2 = f_minus_1;
+                   f_minus_1 = fib;
+                   fib = f_minus_1 + f_minus_2;
+               } else {
+                   fib += i
+               }
+               println!("F{}: {}",i,fib);
+           };
+       }
+     #+end_src
+**** TODO 3. print the lyrics to the "Twelve days of christmas" using the repetitiveness of the song
+     

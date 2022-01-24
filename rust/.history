@@ -132,3 +132,74 @@ which cargo | sed -n 's/bin\/cargo/bin\//p'
 which rust
 ./rustBookCh3 
 ./rustBookCh3 
+cd ..
+l
+cargo run
+  |     ^^^^^^^^^^^^^^^^^^^^^- help: consider using a semicolon here: `;`
+cargo run
+cargo run
+l
+cd target/
+l
+cd debug/
+l
+./exercises 
+32c
+./exercises 
+./exercises 
+./exercises 
+./exercises 
+./exercises 
+./exercises 
+./exercises 
+./exercises 
+./exercises 
+1
+./exercises 
+./exercises 
+./exercises 
+./exercises  
+212
+./exercises  
+./exercises  212
+./exercises
+212.5
+./exercises
+./exercises
+212
+./exercises
+./exercises
+./exercises
+./exercises
+1
+./exercises
+./exercises
+./exercises
+./exercises
+./exercises
+./exercises
+./exercises
+./exercises
+./exercises
+./exercises
+./exercises
+l
+cd target/debug/
+l
+./exercises 
+./exercises 
+cd ../target/debug/
+;
+l
+./exercises 
+./exercises 
+./exercises 
+./exercises 
+./exercises 
+./exercises 
+./exercises 
+./exercises 
+./exercises 
+./exercises 
+./exercises
+./exercises
