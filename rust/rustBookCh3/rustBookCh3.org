@@ -513,7 +513,6 @@ so basically, any line that ends in a semicolon doesn't OF ITSELF immediately re
        fn main() {
            // so, looping function that adds the numbers is what will end up returning it. so, main will act almost like a wrapper
 
-
            loop {
                let mut n = String::new();
 
