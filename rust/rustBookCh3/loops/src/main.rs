@@ -47,9 +47,8 @@ while index < 5 {
     index += 1;
 }
 
-    // without using & to "borrow" the array, it can't be accessed. why exactly again? because it's already been used/accessed by the previous while loop?
-for shitfucker in &a {
-    println!("uhh what? {}", shitfucker);
+for elem in a {
+    println!("uhh what? {},"elem);
 }
 
 }
