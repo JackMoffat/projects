@@ -1,0 +1,81 @@
+* 4:Understanding Ownership
+  we'll come back to ch3 later
+  - Ownership is pretty unique to Rust.
+  - allows for "memory safety guarantees withoiut need for garbage collector?"
+  - related features:
+    - borrowing
+    - slices
+    - how rust lays out data in memory
+  
+* 4.1 what is ownership
+  - important concepts:
+    - stack and heap
+
+** Ownership is the rules of how a rust program manages memory
+   - memory that is no longer being used can be recovered by garbage collectors or, in some languages, has to be freed manually
+   - rust implements a third method: a rules system that is enforced at compilation -> if rules aren't followed, program won't compile
+   - emphasis on the fact that rust is a systems programming language
+  
+** stack vs heap
+   - stack and heap are memory available to you rprogram that are structured differently
+   - Stack is structured LIFO: last in, first out.
+     - when you add something it adds to the top of the pile, and when you need something you take it off the top
+     - metaphor given is like a stack of platesx
+   - the HEAP: less organized but more flexible
+     - a request is made for a certain amount of memory
+     - allocator finds an empty spot in memory large enough to accommodate the request, and returns a pointer aka the address of that location
+     - process called /allocating on teh heap/, generally just /allocating/
+   - pointers to the heap are returned and can be stored on the stack, but when you want the actual data you need to follow the pointer
+   - pushing to the stack is faster than heap because the allocator doesn't need to search for a place to store the data
+   - accessing heap data is slower than stack data because extra operation of following the pointer to thehea[
+     - this slows things down because (at present) processors work better on data that is closer together
+   - when you call a function, the values passed in and the local variables of the function are all pushed onto the stack and are popped off when the function ends
+   - so, keeping track of what code/data is oon the stack and on the heap so that you don't duplicate data or hold no longer needed data is what ownership helps with.
+     - overall, won't need to think about this too much once you understand ownership in rust
+
+** ownership rules
+  - every value in rust has a variable called it's /owner/
+  - there acn only be one owner at a time
+  - when the owner goes out of scope, the value will be dropped
+   
+    
+** basic example
+   #+begin_src rust
+     {// no s
+     let s = "hola"; // valid here forward
+     // etc etc
+     } // now scope over, so no more s
+   #+end_src
+
+** the =String= type
+   - all types previously covered in ch.3  were of a known size and easy to copy to and from the stack
+   - strings are more often stored on the heap - I guess this makes sense because they're much more variable in size
+   - strings will be covered more in ch.8 too
+   - 
+
+*** string literals
+    string values that are hardcoded into the programs
+    - immutable, known at compile time
+    - can't be used to get usree input
+   
+*** the =String= type 
+    - stores string on the heap
+
+    - this sort of string, created using the =from= function, creates a =String= from the string literal
+
+    - this sort of string can also be mutable
+
+    - the push_str method appends a string literal to the end of the string
+
+      #+begin_src rust
+        let mut s = String::from("hello");
+
+        s.push_str(", worrrrrrld!");
+        println!("{}",s)
+      #+end_src
+
+*** memory allocation and strings vs literals
+    - the ::from invocation is what requests the allocator to find the required amount of memory on the heap
+      - apparently this bit is pretty universal
+    - the difference with rust is that instead of needing a garbage collector or manual code to free up the memory, the memory gets automatically returned when variable goes out of scope
+    - this is done by Rust automatically invoking the ~drop~ special function at the end of the curly brace
