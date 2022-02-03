@@ -60,7 +60,6 @@
    
 *** the =String= type 
     - stores string on the heap
-
     - this sort of string, created using the =from= function, creates a =String= from the string literal
 
     - this sort of string can also be mutable
@@ -68,10 +67,12 @@
     - the push_str method appends a string literal to the end of the string
 
       #+begin_src rust
-        let mut s = String::from("hello");
+        {
+            let mut s = String::from("hello"); // s is now valid
 
-        s.push_str(", worrrrrrld!");
-        println!("{}",s)
+            s.push_str(", worrrrrrld!"); // appends a ~literal~ to a string -> then where does it go? does it become all literal or all String?
+            println!("{}",s)
+        } // s is no longer valid -> the scope is over
       #+end_src
 
 *** memory allocation and strings vs literals
@@ -79,3 +80,277 @@
       - apparently this bit is pretty universal
     - the difference with rust is that instead of needing a garbage collector or manual code to free up the memory, the memory gets automatically returned when variable goes out of scope
     - this is done by Rust automatically invoking the ~drop~ special function at the end of the curly brace
+    - " this pattern may seem simple now but is has a profound impact on the way rust code is written"
+    
+      
+*** ways variables and data interact
+**** integer interaction
+    #+begin_src rust
+      let x = 5;
+      let y = x;
+    #+end_src
+    the output of these integers is that there will be two variables, x and y, that both equal five. these are then pushed onto the stack
+**** string interaction
+    - multiple variables can interact with the same data in differnet wyas
+   [[file:trpl04-01.svg]] 
+   - This is how a =string= is represented in memory
+   - the pointer to the memory that holds the string's contents
+   - te =len= is how much memory (bytes) the string is currently using
+   - the =capacity= is the amount of memory (bytes) given to the string by the allocator
+     - this is an important difference but we won't be getting into it at this stage
+**** string references
+     #+begin_src rust
+       let s1 = String::from("Oi!");
+       let s2 = s1;
+     #+end_src
+     - *when we assign s1 to s2, the ~String~ data is copied!*
+       - We do NOT copy the actual data on the heap, we only copy the pointer to that data, the len of the string, and the capacity of the string
+       [[file:trpl04-02.svg]]- 
+     - above is what this copy operation looks like
+    [[file:trpl04-03.svg]]
+    - above is NOT what it looks like
+    - 
+**** prevention of double-free errors
+     - woah, so when both s1 and s2 go out of scope, they would both try to free the same memory with =drop=.
+     - this is called a "double-free error"
+     - so, to prevent this, rust makes ~s1~ invalid after the line ~let s2 = s1~
+     - 
+**** implications for shallow-copy vs deep-copy
+     So, the way rust work is to some extent similar to a shallow copy.
+     The difference is that instead of only copying just the pointer, it also invalidates the first variable.
+     Because of this, instead of a shallow copy, it's called a /move/.
+    [[file:trpl04-04.svg]] 
+    Any automatic copying will never be deep -> so, won't be expensive runtime-wise
+**** Clone
+     If we do want a deep copy of the data, we can call ~Clone~
+     #+begin_src rust
+       let s1 = String::from("hello");
+       let s2 = s1.clone();
+
+       println!("s1 = {}, s2 = {}",s1,s2)
+     #+end_src
+
+     - calls to clone are a "..visual indicator that something different is going on". This may be expensive
+     - so, this copies and looks like this
+    [[file:trpl04-03.svg]] 
+**** Stack-only Data: Copy
+     The ~let x = 5; let y = x;~ code is valid.
+     the reason we don't need to call clone here is because integers with a known size at compile time are stored entirely on the stack
+     This means copies are easy to make, and we wouldn't have any reason to invalidate x after declaring y
+     Aka no difference between a deep and shallow copy
+     The =Copy= trait can be placed on types that are stored in the stack. If this trait is implemented for a type, then the variable will still be valid after it has been asssigned to another variable.
+     You can't annotate a type with the copy trait if it implemenets the ~Drop~ trait.
+
+     As a general rule, groups of simple scalar values can implement ~Copy~
+     - integers
+     - bools
+     - floats
+     - char
+     - tuples if composed of types that impelemnt copy
+** Ownership and Functions
+*** examples of where things cope in and out of scope
+     - passing a variable toa  function will either move or copy the value consistent with how the type behavesduring assignment
+     #+begin_src rust
+       fn main() {
+           let s = String::from("hello");  // s comes into scope
+
+           takes_ownership(s);             // s's value moves into the function...
+           // ... and so is no longer valid here
+
+           let x = 5;                      // x comes into scope
+
+           makes_copy(x);                  // x would move into the function,
+           // but i32 is Copy, so it's okay to still
+           // use x afterward
+
+       } // Here, x goes out of scope, then s. But because s's value was moved, nothing
+       // special happens.
+
+       fn takes_ownership(some_string: String) { // some_string comes into scope
+           println!("{}", some_string);
+       } // Here, some_string goes out of scope and `drop` is called. The backing
+       // memory is freed.
+
+       fn makes_copy(some_integer: i32) { // some_integer comes into scope
+           println!("{}", some_integer);
+       } // Here, some_integer goes out of scope. Nothing special happens.
+     #+end_src
+*** Return values and scope
+    #+begin_src rust
+      fn main() {
+          let s1 = gives_ownership();         // gives_ownership moves its return
+                                              // value into s1
+
+          let s2 = String::from("hello");     // s2 comes into scope
+
+          let s3 = takes_and_gives_back(s2);  // s2 is moved into
+                                              // takes_and_gives_back, which also
+                                              // moves its return value into s3
+      } // Here, s3 goes out of scope and is dropped. s2 was moved, so nothing
+        // happens. s1 goes out of scope and is dropped.
+
+      fn gives_ownership() -> String {             // gives_ownership will move its
+                                                   // return value into the function
+                                                   // that calls it
+
+          let some_string = String::from("yours"); // some_string comes into scope
+
+          some_string                              // some_string is returned and
+                                                   // moves out to the calling
+                                                   // function
+      }
+
+      // This function takes a String and returns one
+      fn takes_and_gives_back(a_string: String) -> String { // a_string comes into
+                                                            // scope
+
+          a_string  // a_string is returned and moves out to the calling function
+    #+end_src
+    - basic summary of above is that returning values with functions can also transfer ownership
+    - ownership of a variable is always the same: assigning it to another variable moves it.
+    - When a variable with heap data moves out of scope, it will be cleaned up by ~Drop~ UNLESS the ownership of that heap data has been transferred to another variable
+    - 
+*** What if we want to let a function use a variable without having to transfer ownership?
+    It would be super damn annoying if every time we wanted to use everythingm, we needed to re return the dang variable
+    We could use a tuple to return multiple variables again, but we'd have to still re-assign them when calling the variable in the first place.
+    #+name: annoying-way
+    #+begin_src rust
+      fn main() {
+          let s1 = String::from("hello");
+
+          let (s2, len) = calculate_length(s1);
+
+          println!("The length of '{}' is {}.", s2, len);
+      }
+
+      fn calculate_length(s: String) -> (String, usize) {
+          let length = s.len(); // len() returns the length of a String
+
+          (s, length)
+      }
+    #+end_src
+* 4.2 References and borrowing
+  
+** Difference between a reference and a pointer
+   A reference is like a pointer in that it is an address we can follow to some data that is owned by some other variable,
+   but unlike a pointer, a reference is guaranteed to point to a valid value of a particular type,
+
+   Here's how you'd make a function that has a reference to an object as it's parameter and therefore doesn't take ownership of the value
+   #+begin_src rust
+     fn main() {
+         let s1 = String::from("HALOO");
+         let len = calculate_Length(&s1);
+         println!("the length of my string '{}' is {}", s1, len);
+     }
+     fn calculate_length(s: &String) -> usize {
+         s.len()
+     }
+   #+end_src
+   - the ampersand syntax is how we use a reference, 
+[[file:trpl04-05.svg]]   
+
+- the ampersand allows for a reference that refers to, but does not take ownership from, the value.
+- using the & in the function parameter's type description is how we tell the function to expect a reference
+- when functions have references for parameters instead of the parameters themselves, we don't need to return the values of those parameters because we never took ownership of them.
+- creating a reference is called borrowing
+
+*** we can't modify values if we are only borrowing them
+    both variables and references are immutable by default
+    
+** mutable references
+   - mutable references are created by using ~mut~ when declaring the variable, and then using ~&mut~ in the type description of any function that would use them
+   - and this does mutate the original piece of data that it borrows
+   - there can only be one mutable reference to a piece of data at a time. if another is created it will fail on compilation
+     - apparently this is something many people struggle with at first
+   - what this allows for is the prevention of *data races*, whcih are events that occur when
+     - 2+ pointers access same data at the same time
+     - 1+ of them is used to write to the data
+     - no mechanism is present to synchronise data access
+   - data races can be particularly tfroublesome and puzzling to fix
+   - many different immutable references to the same piece of data can be created, but they cannot be combined with mutable references
+   - so, if an immutable reference (~&s~) exists, you can't then create a mutable reference (~&mut s~)
+  
+** Non-lexical lifetimes
+   the code below is fine due to the compiler's use of something called /non-lexical lifetimes/
+   #+begin_src rust
+     fn main() {
+         let mut s = String::from("REEEEEEEEEEEEEEEEEEY");
+         let r1 = &s;
+         let r2 = &s;
+         println!("{} and {}", r1, r2);
+
+
+         // ah, on compilation the compiler is able to tell where the last use of any reference is and drop it
+         //   even if that last use is within the scope in which it would be valid usually
+
+         let r3 = &mut s;
+
+     }
+   #+end_src
+
+** dangling references
+  Dangling pointers are pointers that refer to locations in memory that might have (or have?) beeen given to someting else
+  They are commonly created by freeing some piece of memory that a pointer refers to but keeping the pointer itself
+
+  - The Rust compiler's design guarantees that while a reference to some data exists, the data will remain in scope until the reference is removed
+  
+*** code that would typically create a dangling reference
+    #+begin_src rust
+      fn main() {
+          let reference_to_nothing = dangle();
+      }
+
+      fn dangle() -> &String {
+          let s = String::from("hello");
+
+          &s
+      }
+    #+end_src
+    The error generated will reference something called a ~lifetime~, which we haven't covered yet
+    So, why the above would create a dangler:
+    1. s is created inside dangle: therefore, when ~dangle~ is finished then ~s~ will be deallocated
+    2. the last value is the return value of the function, ~&s~. what we tried to do, however, is return this /reference/ to a piece of memory that has already been deallocated!
+    3. rust prevents us from doing that
+
+    To fix the above, we return the string directly
+    #+begin_src rust
+      fn no_dangle() -> String {
+          let s = String::from("hello");
+
+          s
+      }
+    #+end_src
+    - in this code, we directly return s - not a reference to it, and so the ownership is moved out of the function
+    
+** Summary
+   1. you can  have either any number of immutable references to a piece of data, or a single mutable reference to it
+   2. references must always be valid (enforced by compiler)
+
+
+   
+* 4.3 Slices
+  
+** runthrough of example of what proble mslices solve
+   #+begin_src rust
+
+
+     fn first_word(s: &String) -> usize {
+         let bytes = s.as_bytes();
+
+         for (i, &item) in bytes.iter().enumerate() {
+             if item == b' ' {
+                 return i;
+             }
+         }
+
+         s.len()
+     }
+   #+end_src
+   - ah, the usize returned here is because that would be the index of the space
+   - we're looking to find where a word is by looking for a space character
+   - so, first:
+     - let bytes = s.as_bytes() changes the string to an array of bytes so that we can loop through each element
+     - i, &item is the index and a REFERENCE to the item, not the item itself
+     - .iter() returns each element of a collection
+     - .enumerate() wraps iter and returns each element as part of a tuple, where the first value in the tuple is the index of the item in the collection
+     - we could then destructure the tuple 
