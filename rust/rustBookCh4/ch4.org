@@ -327,7 +327,6 @@
    2. references must always be valid (enforced by compiler)
 
 
-   
 * 4.3 Slices
   
 ** runthrough of example of what proble mslices solve
@@ -351,6 +350,81 @@
    - so, first:
      - let bytes = s.as_bytes() changes the string to an array of bytes so that we can loop through each element
      - i, &item is the index and a REFERENCE to the item, not the item itself
+       - and this syntax is also an example of destructuring a tuple, though we will cover this more later
      - .iter() returns each element of a collection
      - .enumerate() wraps iter and returns each element as part of a tuple, where the first value in the tuple is the index of the item in the collection
-     - we could then destructure the tuple 
+     - we could then destructure the tuple
+     - method: ~s.clear()~ will make a string be equal to ""
+       
+*** problems with keeping things in sync
+     #+begin_src rust
+       fn main() {
+           let mut s = String::from("hello world");
+
+           let word = first_word(&s); // word will get the value 5
+
+           s.clear(); // this empties the String, making it equal to ""
+
+           // word still has the value 5 here, but there's no more string that
+           // we could meaningfully use the value 5 with. word is now totally invalid!
+       }
+ 
+     #+end_src
+
+     This program would compile, but the key error here is that word will get the value of the index for a particular word but that will be totally unrelated to any future value.
+     we cleared the value of s, but that doesn't do anything to the value of word
+     This would compound when we add a second word function, 
+     #+begin_src rust
+       fn second_word(s: &String) -> (usize, usize) {
+     #+end_src
+     Because now, we have to keep track of two indices (the start and end of the words within the string) and they still have no real relation to ~s~, the string they are alleged to come from
+     
+** String slices 
+   thank ye jangus, this exists
+#+begin_src rust
+  let s = String::from("hello world");
+
+  // don't need to specify starting index if starting from zero
+  let slice = &s[0..5];
+  // is the same as
+  let slice = &s[..5];
+
+  // don't need to specify ending index if going to end of string
+  let len = s.len();
+  let slice = &s[4..len];
+  // is the same as
+  let slice = &s[4..];
+
+
+  // you could also take a slice of a whole string
+  let slice = &s[..];
+
+
+
+
+#+end_src
+(ch. 8 will go more into handling UTF-8 text aka multibyte text)
+
+- the slice type is specified by ~&str~
+
+** Here's how first_word looks when rewritten to use slices
+- so ~&String~ here means that it is taking in an immutable reference to a ~String~ type -> this isn't a string literal, but the String::from() method creates a string FROM a literal
+   #+begin_src rust :file-name test.tmp
+     fn first_word(s: &String) -> &str {
+         let bytes = s.as_bytes();
+
+         for (i, &item) in bytes.iter().enumerate() {
+             if item == b' ' {
+                 return &s[0..i];
+                 }
+             } // remember, here by ending lines without the semicolon we are expecting return values
+         };
+ 
+         
+
+   #+end_src
+
+** String literals are slices
+   if you had ~let s = "hello, word!";~
+   the type of =s= would be ~&str~
+
