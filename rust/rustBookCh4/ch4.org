@@ -1,4 +1,4 @@
-* 4:Understanding Ownership
+* 4 Understanding Ownership
   we'll come back to ch3 later
   - Ownership is pretty unique to Rust.
   - allows for "memory safety guarantees withoiut need for garbage collector?"
@@ -230,7 +230,6 @@
       }
     #+end_src
 * 4.2 References and borrowing
-  
 ** Difference between a reference and a pointer
    A reference is like a pointer in that it is an address we can follow to some data that is owned by some other variable,
    but unlike a pointer, a reference is guaranteed to point to a valid value of a particular type,
@@ -326,9 +325,7 @@
    1. you can  have either any number of immutable references to a piece of data, or a single mutable reference to it
    2. references must always be valid (enforced by compiler)
 
-
 * 4.3 Slices
-  
 ** runthrough of example of what proble mslices solve
    #+begin_src rust
 
@@ -425,6 +422,105 @@
    #+end_src
 
 ** String literals are slices
+   String literals are stored inside the binary
    if you had ~let s = "hello, word!";~
    the type of =s= would be ~&str~
+   in fact, it is because literals are stored inside the binary that they are immutable
+   
+   
+** String slices as parameters
 
+   Ah so here are the changes we would make
+   #+begin_src rust :file-name test.tmp
+     fn first_word(s: &String) -> &str {
+   #+end_src
+   #+begin_src rust :file-name test.tmp
+     fn first_word(s: &str) -> &str {
+   #+end_src
+
+   ....why exactly is this better? "implicit deref coercions" in ch. 15?
+   - it does improve the api, so that...... more consistent?
+   - 
+
+** Other slices
+   - you can take slices of arrays
+   #+begin_src rust
+let a = [1, 2, 3, 4, 5];
+let slices = &a[1..3];
+assert_eq!(slice, &[2,3])
+   #+end_src
+
+   ok cool
+
+* Ending part: re-designing code from exercises at the end of ch. 3
+  :PROPERTIES:
+  :header-args:rust: :tangle ./exercises/src/main.rs
+  :END:
+  Alrightey, so now that we have a bit more info about certain slices, we can redo our functions from the exercise at the end of Ch. 3 to be better
+
+   
+** Convert temperatures between celsius and fahrenheit
+   1. get user input
+   2. compare to the set of values
+   3. convert the thing
+   
+   #+begin_src rust
+use std::io;
+
+fn main() {
+
+    let (user_temp, user_unit) = get_input();
+    let (converted_temp,converted_unit) = convert_temperature(user_temp,user_unit);
+    println!("converted temperature is: {} {}", converted_temp,converted_unit)
+
+}
+   #+end_src
+
+   
+     
+   
+*** convert temp
+    #+begin_src rust
+fn convert_temperature(user_temperature: f32, user_unit: String) -> String {
+    // can I use &str references here?
+    // call this after getting user temp and unit into the correct form
+    const RATIO_DEG_F_PER_C: f32 = 2.12;
+
+
+    let arr_fahrenheit = ["f","F","fahrenheit","Fahrenheit"];
+    let arr_celsius = ["c", "C", "celsius", "Celsius"];
+
+    let mut converted_unit = String::new();
+
+    for item in arr_celsius {
+        if item == user_unit {
+            let converted_unit = "F";
+            return (user_temperature * RATIO_DEG_F_PER_C, converted_unit);
+        }
+    };
+
+    for item in arr_fahrenheit {
+        if item == user_unit {
+            let converted_unit = "C";
+            return (user_temperature / RATIO_DEG_F_PER_C, converted_unit);
+        }
+    };
+
+    println!("uh oh, program shouldn't have reached here");
+}
+
+
+fn get_input() {
+    let mut user_input = String::new();
+    println!("please enter the temperature and single-letter abbreviation of the unit to convert, to at least one decimal point in accuracy, separated by a space (eg. 203.0 c or 203.1 f or 203.868 C or 203.4 F)");
+    io::stdin().read_line(&mut user_input).expect("expect....?");
+    // split the string apart
+
+    let bytes = user_input.as_bytes();
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return (&user_input[0..i],&user_input[i..]);
+        }
+    }
+}
+    #+end_src

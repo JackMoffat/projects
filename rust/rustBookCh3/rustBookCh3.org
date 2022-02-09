@@ -322,7 +322,7 @@ so basically, any line that ends in a semicolon doesn't OF ITSELF immediately re
      #+begin_src rust
        fn main() {
      #+end_src
-**** [#A] ~if~ expressions
+**** ~if~ expressions
      - so, the else between clauses of the ~if~ expression is done on the same line - sandwichy-style
      #+begin_src rust
        let number = 3;
@@ -441,8 +441,7 @@ so basically, any line that ends in a semicolon doesn't OF ITSELF immediately re
     :header-args:rust: :tangle ./exercises/src/main.rs
     :END:
     build programs that do the following
-**** DONE 1. convert temperatures between Celsius and Fahrenheit
-     CLOSED: [2022-01-24 Mon 09:52]
+**** 1. convert temperatures between Celsius and Fahrenheit
      :LOGBOOK:
      - Note taken on [2022-01-23 Sun 10:14] \\
        ok, so build some pseudocode first?
@@ -507,8 +506,7 @@ so basically, any line that ends in a semicolon doesn't OF ITSELF immediately re
            };
        }
      #+end_src
-**** DONE 2. generate the nth Fibonacci number
-     CLOSED: [2022-01-24 Mon 11:44]
+**** 2. generate the nth Fibonacci number
      #+begin_src rust
        use std::io;
 
@@ -547,7 +545,7 @@ so basically, any line that ends in a semicolon doesn't OF ITSELF immediately re
            };
        }
      #+end_src
-**** TODO 3. print the lyrics to the "Twelve days of christmas" using the repetitiveness of the song
+**** 3. print the lyrics to the "Twelve days of christmas" using the repetitiveness of the song
      so current status for mine is that it isn't fully correctly printing the final lines
 ***** make lyrics
 #+begin_src rust
