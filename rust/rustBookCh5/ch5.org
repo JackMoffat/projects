@@ -1,0 +1,132 @@
+* Using structs to structure related data
+- so, it says that some of the best things about structs are the methods and type checking that go along with them
+- 
+* 5.1 defining and instantiating structs
+  :PROPERTIES:
+  :header-args:rust: :tangle ./src/main.rs
+  :END:
+#+name: open-main
+#+begin_src rust
+fn main() {
+
+#+end_src
+  
+**  Structs: More flexible than tuples
+  - every value is named
+  - these named values make up the struct's /fields/
+
+#+begin_src rust
+struct User {
+    active: bool,
+    username: String,
+    email: String,
+    sign_in_count: u64,
+}
+
+
+
+let user1 = User {
+    email: String::from("abc@123.com.ru.rs.sc.am.y.ou"), 
+    username: String::from("someone"),
+    active: true,
+    sign_in_count: 1,
+};
+#+end_src
+- Note that the lines between struct fields are separated by commas, because it isn't a statement(";") or expression("<nothing>")
+
+  
+
+** mutability
+ - either all of the instance of a struct is mutable, or none of it is.
+ - you can't declare individual fields to be mutable
+#+begin_src rust
+
+let mut user1 = User {
+    email: String::from("abc@123.com.ru.rs.sc.am.y.ou"), 
+    username: String::from("someone"),
+    active: true,
+    sign_in_count: 1,
+};
+// now it can be mutated
+user1.email = String::from("abababa@example.com");
+#+end_src
+#+end_src
+** using a function
+   - In the build_user function below, having the User{} part as the last *expression* (aka no semicolon) of the function means (implicitly) that it is the value to be returned
+    #+begin_src rust
+fn build_user(email: String, username: String) -> User {
+    User {
+        email: email,
+        username: username,
+        active: true,
+        sign_in_count: 1,
+    }
+}
+    #+end_src
+** Ok, now the field init shorthand!!!!!!!!!!
+   - As long as the named parameters in a function that instantiates a struct are the same as the struct's fields, you can use the ~field init shorthand~ syntax
+   - saves time, less repetitive
+   - Also, syntactically, you can give the last line a comma
+   #+begin_src rust
+fn build_user(email: String, username: String) -> User {
+    User {
+        email,
+        username,
+        active: true,
+        sign_in_count: 1,
+    }
+}
+   #+end_src
+- so above, some of the fields are done by field init and the others are instantiated within the function
+** ~Struct Update~ syntax: creating instances from other instances
+*** With and Without ~Struct update~ syntax
+    #+begin_src rust
+// without Struct Update syntax - manually declaring values
+// let user2 = User {
+//     active: user1.active,
+//     username: user1.username,
+//     email: String::from("another@example.com"),
+//     sign_in_count: user1.sign_in_count,
+// };
+
+// With Struct update syntax - showing how fields not explicitly set should take their values from the given other instance
+    // BUT! below no es bueno because the ownership of user1's "username" value was not transferred
+let user2 = User {
+    email: String::from("jack@jack.com"),
+    ..user1
+};
+
+    #+end_src
+**** SERIOUSLY important information re: above
+     - OK: I think it is because the email and username fields are of =String= type, they therefore aren't string literals
+     - aka since they're not string literals, they are just pointers to the same
+     - I tried a few things to make it work but no bueno so far. Not sure why you'd ever want the use case where you could still have it in scope in a different User object, though
+     - importantly, the user2 example above *moves* the ownership of user1's ~username~ field into user2
+     - it is therefore out of scope for user
+** Using Tuple Structs w/o named fields to create different types
+   - Ok, so the below is useful/important because now there are different types for two different pieces of data that would otherwise share the exact same structure
+   - this way, functions that are supposed to take structs of type =Color= won't work if given a type =Point=
+  #+begin_src rust
+struct Color(i32,i32,i32);
+struct Point(i32,i32,i32);
+
+let black = Color(0,0,0);
+let origin = Point(0,0,0);
+  #+end_src
+** unit-like structs without any fields
+   - These behave similarly to ~()~ (c.f. ch3.2)
+   - "Useful in situations in which you need to implement a trait on some type but don;t have any data taht you want to store inthe type itself"
+   #+begin_src rust
+struct AlwaysEqual;
+let subject = AlwaysEqual;
+   #+end_src
+   - implications of this will be covered more in ch. 10
+** Ownership of struct data
+   - this box is talking more about stuff we'll go into more depth in later
+   - This is important, but I don't wnat to type it out right now so here's the link
+   - [[https://doc.rust-lang.org/book/ch05-01-defining-structs.html#creating-instances-from-other-instances-with-struct-update-syntax][go to the bottom of the page]]  
+** close main
+#+name: close-main
+#+begin_src rust
+}
+#+end_src
