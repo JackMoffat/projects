@@ -273,7 +273,7 @@
    the code below is fine due to the compiler's use of something called /non-lexical lifetimes/
    #+begin_src rust
      fn main() {
-         let mut s = String::from("REEEEEEEEEEEEEEEEEEY");
+         let mut s = String::from("Hola");
          let r1 = &s;
          let r2 = &s;
          println!("{} and {}", r1, r2);
