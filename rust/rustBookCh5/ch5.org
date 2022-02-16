@@ -10,7 +10,7 @@
 fn main() {
 
 #+end_src
-  
+
 **  Structs: More flexible than tuples
   - every value is named
   - these named values make up the struct's /fields/
@@ -125,6 +125,95 @@ let subject = AlwaysEqual;
    - this box is talking more about stuff we'll go into more depth in later
    - This is important, but I don't wnat to type it out right now so here's the link
    - [[https://doc.rust-lang.org/book/ch05-01-defining-structs.html#creating-instances-from-other-instances-with-struct-update-syntax][go to the bottom of the page]]  
+** close main
+#+name: close-main
+#+begin_src rust
+}
+#+end_src
+* 5.2 example program using structs
+  :PROPERTIES:
+  :header-args:rust: :tangle ./src/main.rs
+  :END:
+#+name: open-main
+#+begin_src rust
+fn main() {
+
+#+end_src
+** beginning of the thing, without structs
+  "we'll start with a single variable, and then refactor until we're using structs instead"
+  #+begin_src rust
+let width1 = 30;
+let height1 = 50;
+
+println!(
+    "the area of the rectangle is {} square pixels",
+    area(width1, height1)
+);
+
+fn area(width: u32, height: u32) -> u32 {
+    width * height
+}
+  #+end_src
+- There are some interesting design points in this section
+- they say that "the area function is supposed to calculate the area of one rectangle, but we've wrote a function with two parameters"
+- since the parameters are related, eg they always only describe one rectangle, it would be better practice for legibility to group them together
+** grouping using tuples
+  #+begin_src rust
+let rect1 = (30, 50);
+println!(
+    "the area of the rectangle is {} square pixels",
+    area(width1, height1)
+);
+
+fn area(dimensions: (u32, u32)) -> u32 {
+    dimensions.0 * dimensions.1
+}
+  #+end_src
+  - so, this is more structured but is also in a way less clear
+  - tuples don't name their fields
+  - so it's simple in this example, but would get very complicated in others
+** refactoring with structs
+   #+begin_src rust
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+let rect1 = Rectangle {
+    width: 30,
+    height: 50,
+};
+
+println!(
+    "The rectangle's area is: {} square pixels",
+    area(&rect1)
+);
+
+fn area(rectangle: &Rectangle) -> u32 {
+    rectangle.width * rectangle.height
+}
+   #+end_src
+   - ok cool, so here we make the rectangle struct and then create an instance of it.
+   - when we call the area function on it, we *borrow* the instance rect1
+   - the area function defined knows to expect a *borrowed* Rectangle struct
+     - this parameter in the area function is further defined to be an *immutable borrow*
+   - this is definitely more clear, as we can then call rectangle.width and rectangle.height
+   
+** Adding useful functionality with derived traits
+   - so, we can't currently print a rect1 struct
+   - we need to define a Display formatting
+   - we would ALSO need to define a Debug formatting for our new struct Rectangle
+   - adding the debugging is easy -> you effectively have to opt in
+   #+begin_src rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+    }
+    #+end_src
+    - debug (called by ~{:?}~) effectively allows the entire instance to be printed as it is defined in the code
+    - shows all fields of the instance
+    - with larger structs we can use ~{:#?}~ and fields will all be printed on separate lines
 ** close main
 #+name: close-main
 #+begin_src rust
