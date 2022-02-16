@@ -20,7 +20,8 @@ fn main() {
         // is it important that the let guess line comes AFTER the value has been assigned?
         // what the fucK?
         // original, which would panic!!!!!!! and quit
-        // let guess: u32 = guess.trim().parse().expect("please type a number!"); // expect clause here is in case you type somethin fucking stupid
+        // let guess: u32 = guess.trim().parse().expect("please type a number!"); // expect clause here is in case you type somethin ing stupid
+        // let guess: u32 = guess.trim().parse().expect("please type a number!"); // expect clause here is in case you type somethin ing stupid
 
         let guess: u32 = match guess.trim().parse() {
             Ok(num) => num,

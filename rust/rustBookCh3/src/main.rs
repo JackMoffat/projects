@@ -10,7 +10,8 @@ let x = x + 1;
 
 {
     let x = x * 2;
-    println!("fuck fuck FUCK ME AAAAHHHHH: {}", x)
+    println!("  FUCK ME AAAAHHHHH: {}", x)
+    println!("  FUCK ME AAAAHHHHH: {}", x)
 }
 
 println!("The value x is: {}", x);

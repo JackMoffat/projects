@@ -36,7 +36,10 @@
 
       {
           let x = x * 2;
-          println!("fuck fuck FUCK ME AAAAHHHHH: {}", x)
+          println!("   ME AAAAHHHHH: {}", x)
+          println!("   ME AAAAHHHHH: {}", x)
+          println!("   ME AAAAHHHHH: {}", x)
+          println!("   ME AAAAHHHHH: {}", x)
       }
 
       println!("The value x is: {}", x);
@@ -239,7 +242,8 @@
    :END:
    - main is the "entry point" of many programs
    - functions are declared by ~fn <name>(<parameters>) {<body>}
-   - functions referenced in main can be defined /further/ down in the main.rs file! as well as before if you want. Rust don't give a fuck
+   - functions referenced in main can be defined /further/ down in the main.rs file! as well as before if you want. Rust don't give a 
+   - functions referenced in main can be defined /further/ down in the main.rs file! as well as before if you want. Rust don't give a 
   
    
 *** Parameters / Arguments
@@ -262,7 +266,7 @@
       print_labeled_measurements(5,'h');
   }
   fn print_labeled_measurements(value: i32, unit_label:char) {
-      println!("REEEEEEEEEEEEEEE: {}{}",value, unit_label);
+      println!("measurements!: {}{}",value, unit_label);
 
   }
 #+end_src
