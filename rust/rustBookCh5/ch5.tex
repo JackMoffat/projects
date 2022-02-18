@@ -1,0 +1,339 @@
+% Created 2022-02-18 Fri 09:26
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\date{\today}
+\title{}
+\hypersetup{
+ pdfauthor={},
+ pdftitle={},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 27.2 (Org mode 9.4.6)}, 
+ pdflang={English}}
+\begin{document}
+
+\tableofcontents
+
+\section{Using structs to structure related data}
+\label{sec:org10c879e}
+\begin{itemize}
+\item so, it says that some of the best things about structs are the methods and type checking that go along with them
+\item 
+\end{itemize}
+\section{5.1 defining and instantiating structs}
+\label{sec:orgbc42997}
+\begin{verbatim}
+fn main() {
+
+\end{verbatim}
+
+\subsection{Structs: More flexible than tuples}
+\label{sec:org3b660d8}
+\begin{itemize}
+\item every value is named
+\item these named values make up the struct's \emph{fields}
+\end{itemize}
+
+\begin{verbatim}
+struct User {
+    active: bool,
+    username: String,
+    email: String,
+    sign_in_count: u64,
+}
+
+
+
+let user1 = User {
+    email: String::from("abc@123.com.ru.rs.sc.am.y.ou"), 
+    username: String::from("someone"),
+    active: true,
+    sign_in_count: 1,
+};
+\end{verbatim}
+\begin{itemize}
+\item Note that the lines between struct fields are separated by commas, because it isn't a statement(";") or expression("<nothing>")
+\end{itemize}
+
+
+
+\subsection{mutability}
+\label{sec:orgd24cf06}
+\begin{itemize}
+\item either all of the instance of a struct is mutable, or none of it is.
+\item you can't declare individual fields to be mutable
+\end{itemize}
+\begin{verbatim}
+
+let mut user1 = User {
+    email: String::from("abc@123.com.ru.rs.sc.am.y.ou"), 
+    username: String::from("someone"),
+    active: true,
+    sign_in_count: 1,
+};
+// now it can be mutated
+user1.email = String::from("abababa@example.com");
+\end{verbatim}
+\#+end\_src
+\subsection{using a function}
+\label{sec:orgae9ce4f}
+\begin{itemize}
+\item In the build\_user function below, having the User\{\} part as the last \textbf{expression} (aka no semicolon) of the function means (implicitly) that it is the value to be returned
+\begin{verbatim}
+fn build_user(email: String, username: String) -> User {
+    User {
+        email: email,
+        username: username,
+        active: true,
+        sign_in_count: 1,
+    }
+}
+\end{verbatim}
+\end{itemize}
+\subsection{Ok, now the field init shorthand!!!!!!!!!!}
+\label{sec:org1acc38a}
+\begin{itemize}
+\item As long as the named parameters in a function that instantiates a struct are the same as the struct's fields, you can use the \texttt{field init shorthand} syntax
+\item saves time, less repetitive
+\item Also, syntactically, you can give the last line a comma
+\end{itemize}
+\begin{verbatim}
+fn build_user(email: String, username: String) -> User {
+    User {
+        email,
+        username,
+        active: true,
+        sign_in_count: 1,
+    }
+}
+\end{verbatim}
+\begin{itemize}
+\item so above, some of the fields are done by field init and the others are instantiated within the function
+\end{itemize}
+\subsection{\texttt{Struct Update} syntax: creating instances from other instances}
+\label{sec:org38b217f}
+\subsubsection{With and Without \texttt{Struct update} syntax}
+\label{sec:org69e228b}
+\begin{verbatim}
+// without Struct Update syntax - manually declaring values
+// let user2 = User {
+//     active: user1.active,
+//     username: user1.username,
+//     email: String::from("another@example.com"),
+//     sign_in_count: user1.sign_in_count,
+// };
+
+// With Struct update syntax - showing how fields not explicitly set should take their values from the given other instance
+    // BUT! below no es bueno because the ownership of user1's "username" value was not transferred
+let user2 = User {
+    email: String::from("jack@jack.com"),
+    ..user1
+};
+
+\end{verbatim}
+\begin{enumerate}
+\item SERIOUSLY important information re: above
+\label{sec:orgb1b206d}
+\begin{itemize}
+\item OK: I think it is because the email and username fields are of \texttt{String} type, they therefore aren't string literals
+\item aka since they're not string literals, they are just pointers to the same
+\item I tried a few things to make it work but no bueno so far. Not sure why you'd ever want the use case where you could still have it in scope in a different User object, though
+\item importantly, the user2 example above \textbf{moves} the ownership of user1's \texttt{username} field into user2
+\item it is therefore out of scope for user
+\end{itemize}
+\end{enumerate}
+\subsection{Using Tuple Structs w/o named fields to create different types}
+\label{sec:orgf5db4d2}
+\begin{itemize}
+\item Ok, so the below is useful/important because now there are different types for two different pieces of data that would otherwise share the exact same structure
+\item this way, functions that are supposed to take structs of type \texttt{Color} won't work if given a type \texttt{Point}
+\end{itemize}
+\begin{verbatim}
+struct Color(i32,i32,i32);
+struct Point(i32,i32,i32);
+
+let black = Color(0,0,0);
+let origin = Point(0,0,0);
+\end{verbatim}
+\subsection{unit-like structs without any fields}
+\label{sec:org16da983}
+\begin{itemize}
+\item These behave similarly to \texttt{()} (c.f. ch3.2)
+\item "Useful in situations in which you need to implement a trait on some type but don;t have any data taht you want to store inthe type itself"
+\end{itemize}
+\begin{verbatim}
+struct AlwaysEqual;
+let subject = AlwaysEqual;
+\end{verbatim}
+\begin{itemize}
+\item implications of this will be covered more in ch. 10
+\end{itemize}
+\subsection{Ownership of struct data}
+\label{sec:orgdea9345}
+\begin{itemize}
+\item this box is talking more about stuff we'll go into more depth in later
+\item This is important, but I don't wnat to type it out right now so here's the link
+\item \href{https://doc.rust-lang.org/book/ch05-01-defining-structs.html\#creating-instances-from-other-instances-with-struct-update-syntax}{go to the bottom of the page}
+\end{itemize}
+\subsection{close main}
+\label{sec:orgb34faba}
+\begin{verbatim}
+}
+\end{verbatim}
+\section{5.2 example program using structs}
+\label{sec:org23be68c}
+\begin{verbatim}
+fn main() {
+
+\end{verbatim}
+\subsection{beginning of the thing, without structs}
+\label{sec:org3fb9a63}
+"we'll start with a single variable, and then refactor until we're using structs instead"
+\begin{verbatim}
+let width1 = 30;
+let height1 = 50;
+
+println!(
+    "the area of the rectangle is {} square pixels",
+    area(width1, height1)
+);
+
+fn area(width: u32, height: u32) -> u32 {
+    width * height
+}
+\end{verbatim}
+\begin{itemize}
+\item There are some interesting design points in this section
+\item they say that "the area function is supposed to calculate the area of one rectangle, but we've wrote a function with two parameters"
+\item since the parameters are related, eg they always only describe one rectangle, it would be better practice for legibility to group them together
+\end{itemize}
+\subsection{grouping using tuples}
+\label{sec:orgb49cd7c}
+\begin{verbatim}
+let rect1 = (30, 50);
+println!(
+    "the area of the rectangle is {} square pixels",
+    area(width1, height1)
+);
+
+fn area(dimensions: (u32, u32)) -> u32 {
+    dimensions.0 * dimensions.1
+}
+\end{verbatim}
+\begin{itemize}
+\item so, this is more structured but is also in a way less clear
+\item tuples don't name their fields
+\item so it's simple in this example, but would get very complicated in others
+\end{itemize}
+\subsection{refactoring with structs}
+\label{sec:org0f37588}
+\begin{verbatim}
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+let rect1 = Rectangle {
+    width: 30,
+    height: 50,
+};
+
+println!(
+    "The rectangle's area is: {} square pixels",
+    area(&rect1)
+);
+
+fn area(rectangle: &Rectangle) -> u32 {
+    rectangle.width * rectangle.height
+}
+\end{verbatim}
+\begin{itemize}
+\item ok cool, so here we make the rectangle struct and then create an instance of it.
+\item when we call the area function on it, we \textbf{borrow} the instance rect1
+\item the area function defined knows to expect a \textbf{borrowed} Rectangle struct
+\begin{itemize}
+\item this parameter in the area function is further defined to be an \textbf{immutable borrow}
+\end{itemize}
+\item this is definitely more clear, as we can then call rectangle.width and rectangle.height
+\end{itemize}
+
+\subsection{Adding useful functionality with derived traits}
+\label{sec:org17d3b48}
+\begin{itemize}
+\item so, we can't currently print a rect1 struct
+\item we need to define a Display formatting
+\item we would ALSO need to define a Debug formatting for our new struct Rectangle
+\item adding the debugging is easy -> you effectively have to opt in
+\end{itemize}
+\begin{verbatim}
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+    }
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+        };
+    // prints the whole structure
+    println!("rect1 is {:?}",rect1); 
+    // prints it in a line-by-line way
+    println!("rect1 is {:#?}",rect1);
+    }
+\end{verbatim}
+\begin{itemize}
+\item debug (called by \texttt{\{:?\}}) effectively allows the entire instance to be printed as it is defined in the code
+\item shows all fields of the instance
+\item with larger structs we can use \texttt{\{:\#?\}} and fields will all be printed on separate lines
+\end{itemize}
+
+\subsection{dbg! macro}
+\label{sec:org1482ff7}
+\begin{itemize}
+\item \texttt{dbg!} macro:
+\begin{itemize}
+\item takes ownership of an expression
+\item prints the file and line number where the \texttt{dbg!} macro was
+\item prints the value of the expression
+\item returns ownership of the value
+\item then prints this value to the \texttt{stderr} stream
+\end{itemize}
+\item this printing to \texttt{stderr} is different from how println! prints to \texttt{stdout}
+\end{itemize}
+\begin{verbatim}
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let scale = 2;
+    let rect1 = Rectangle {
+        width: dbg!(30*scale),
+        height: 50,
+    };
+    dbg!(&rect1);
+}
+\end{verbatim}
+\begin{itemize}
+\item in the example above, we can use \texttt{dbg!} to
+\end{itemize}
+\subsection{close main}
+\label{sec:orgad1fe96}
+\begin{verbatim}
+}
+\end{verbatim}
+\end{document}

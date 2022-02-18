@@ -210,12 +210,110 @@ struct Rectangle {
     width: u32,
     height: u32,
     }
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+        };
+    // prints the whole structure
+    println!("rect1 is {:?}",rect1); 
+    // prints it in a line-by-line way
+    println!("rect1 is {:#?}",rect1);
+    }
     #+end_src
     - debug (called by ~{:?}~) effectively allows the entire instance to be printed as it is defined in the code
     - shows all fields of the instance
     - with larger structs we can use ~{:#?}~ and fields will all be printed on separate lines
+      
+** dbg! macro
+- ~dbg!~ macro:
+  - takes ownership of an expression
+  - prints the file and line number where the ~dbg!~ macro was
+  - prints the value of the expression
+  - returns ownership of the value
+  - then prints this value to the ~stderr~ stream
+- this printing to ~stderr~ is different from how println! prints to ~stdout~
+#+begin_src rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let scale = 2;
+    let rect1 = Rectangle {
+        width: dbg!(30*scale),
+        height: 50,
+    };
+    dbg!(&rect1);
+}
+#+end_src
+- in the example above, we can use ~dbg!~ within the assignment to rect1's width because after printing, it will return the value of the expression!
+  - so, you can look at what's going on without interfering with the assignment of the value
+    
+** next section
+- the ~area~ function for the rectangle is very specific, so in the next section we'll turn it into a =method= on the Rectangle struct
 ** close main
 #+name: close-main
 #+begin_src rust
 }
 #+end_src
+* 5.3 method syntax
+Methods:
+- similar to functions
+- are named, declared with fn, take parameters, return a value
+- One big difference is that they are initially called with ~impl~, and their first parameter is always ~self~
+
+  
+** defining methods 
+#+begin_src rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    heigt: u32,
+}
+
+
+
+// here we used impl to apply this new method to an existing struct
+impl Rectangle {
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+
+    println!(
+        "The are of the rectangle is {} square pixels",
+        rect1.area() // this now works instead of the previous method of having a separate function
+    )
+
+}
+#+end_src
+
+** ~&self~
+- What the &self is actually short for is ~self: &Self~
+- it is an alias for whatever type that the ~impl~ block is being applied on
+- parameter's *name* is ~self~, *type* is ~Self~
+- we still need to use ~&~ to borrow the Self instance
+- methods are capable of:
+  - taking ownership of self
+  - immutably borrowing self (what we did here)
+  - mutably borrowing self
+- we use &self here because we only need to borrow the struct to read the data
+- if we wanted it to be mutable, we'd use ~&mut self~ for the first param
+- it is rare that we would want to just use ~self~ as the first parameter to take ownership of the funtion by a method
+- usually if used, it is to transform an instance and prevent access to it's original form
+
+
+
+** more benefits of methods
+- it's nice not having to manually write the type of whatever different struct you are calling on
+- it keeps functionality that should be associated only with 
+
