@@ -281,6 +281,9 @@ impl Rectangle {
     fn area(&self) -> u32 {
         self.width * self.height
     }
+    fn width(&self) -> bool {
+        self.width > 0
+    }
 }
 
 fn main() {
@@ -292,11 +295,13 @@ fn main() {
     println!(
         "The are of the rectangle is {} square pixels",
         rect1.area() // this now works instead of the previous method of having a separate function
-    )
+    );
+    if rect1.width() {
+        println!("rectangle has a nonzero width of {}", rect1.width);
+    }
 
 }
 #+end_src
-
 ** ~&self~
 - What the &self is actually short for is ~self: &Self~
 - it is an alias for whatever type that the ~impl~ block is being applied on
@@ -310,10 +315,93 @@ fn main() {
 - if we wanted it to be mutable, we'd use ~&mut self~ for the first param
 - it is rare that we would want to just use ~self~ as the first parameter to take ownership of the funtion by a method
 - usually if used, it is to transform an instance and prevent access to it's original form
-
-
-
+** interesting little note on width as bool
+   - in the implementation of the width part, we've named the method ~width()~ the same as the parameter ~width~
+   - technically you can make the method of ~width~ do whatever you want., BUT
+   - often implentations of methods that have the same name as a trait will only return the trait's value and nothing else, these are called *Getters*
+*** Why are getters useful?
+    - often getters are used because you can make the field itself (~width~) private, but the method (~width()~) public.
+    - this allows for read-only access to the value -> we will discuss more in ch7
 ** more benefits of methods
 - it's nice not having to manually write the type of whatever different struct you are calling on
-- it keeps functionality that should be associated only with 
+- it keeps functionality that should be associated only with
+** Automatic referencing and dereferencing: Rust as compared to C/C++
+   - C/C++ have two different method access syntaxes: ~.~, for when called on object directly, and ~->~ for when you need to dereference a pointer to access the object
+   - rust has no ~->~ operator and instead makes use of *automatic referencing and dereferencing*
+*** how it works
+    - If you call a method by ~object.something()~, rust will add one of ~&, &mut, *~ to make ~object~ match the *signature* of the method
+    #+begin_src rust :tangle no
+p1.distance(&p2);
+(&p1).distance(&p2);
+    #+end_src
+    - so, the two examples above are the same but the first looks cleane
+    - "Given the receiver and the name of a method, rust can figure out definitively whether the method is..."
+    | reading   | ~&self~     |
+    | mutating  | ~&mut self~ |
+    | consuming | ~self~      |
+** methods with more parameters
+   Here we practice making a method that checks whether a given =Rectangle= can fit within another =Rectangle=
+   - point being methods can take other parameters by adding to signature after self
+   #+begin_src rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    heigt: u32,
+}
 
+
+
+// here we used impl to apply this new method to an existing struct
+impl Rectangle {
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+    fn width(&self) -> bool {
+        self.width > 0
+    }
+
+    fn can_hold(&self, other: &Rectangle) -> bool {
+        self.width > other.width && self.height > other.height
+    }
+
+}
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+    let rect2 = Rectangle {
+        width: 10,
+        height: 40,
+    };
+    let rect3 = Rectangle {
+        width: 60,
+        height: 45,
+    };
+
+    println!("can rect1 hold rect2? {}", rect1.can_hold(&rect2));
+    println!("can rect1 hold rect3? {}", rect1.can_hold(&rect3));
+}
+   #+end_src
+** associated functions
+   - All functions defined within ~impl~ blocks are called *associated functions* - they are associated with the ~type~ getting the ~impl~
+   - BUT! it is possible to define associated functions *that are not methods*: that don't have ~&self~ as the first parameter
+   - this sort of function would not need an instance of the type to work with
+  #+begin_src rust
+impl Rectangle {
+    fn square(size: u32) -> Rectangle {
+        Rectangle {
+            width: size,
+            height: size
+        }
+    }
+}
+  #+end_src
+*** Calling these associated functions
+    To call these associated functions we use ~::~ syntax (ex src_rust[:tangle no :eval no]{let sq = Rectangle::square(3);})
+    - "the ~::~ syntax is used for both associated functions and for namespaces created by =modules=" <- more on modules in ch.7
+** multiple ~impl~ blocks
+   It is possible to have multiple ~impl~ blocks, though this is usually entirely equivalent.
+   Multiple ~impl~ blocks are more useful when working with ?generic types/traits? <- in ch.10
+** Next up:
+   Next up in ch. 6 we will talk about ~enum~ -> another way to create custom types
