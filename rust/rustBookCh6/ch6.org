@@ -1,0 +1,156 @@
+* 6 Enums and pattern matching
+  - enums - enumerations
+  - allow you to define a type by enumerating it's possible
+ 
+** chapter goals
+   - show what enums are
+   - then explore the ~option~ enum
+   - then pattern matching w/ ~match~
+   - then, ~if / let~ 
+
+     
+* 6.1 defining an enum
+  :PROPERTIES:
+  :header-args:rust: :tangle ./ch6-1/src/main.rs
+  :END:
+  
+  - here's an example where enums may be more useful than structs
+  - since there are two possible types of IP address that we could come across, we can enumerate those possibilities
+  #+begin_src rust
+enum IpAddrKind {
+    V4,
+    V6,
+}
+  #+end_src
+  
+ 
+** enum values
+   #+begin_src rust
+let four = IpAddrKind::V4;
+let six = IpAddrKind::V6;
+
+fn route(ip_kind: IpAddrKind) {}
+   #+end_src
+   - so, subtypes of an enum are accessible using the double colon syntax - that is how they are namespaced
+   - now we can create functions that take either ~type~, because the type of each is ~IpAddrKind~
+   
+   
+** ok, so now combining enums and structs
+   - wow, this seems quite useful in order to associate the address w/ the type of enum
+   #+begin_src rust
+struct IpAddr {
+    kind: IpAddrKind,
+    address: String,
+}
+
+let home = IpAddr {
+    kind: IpAddrKind::V4,
+    address: String::from("127.0.0.1"),
+};
+
+let loopback = IpAddr {
+    kind: IpAddrKind::V6,
+    address: String::from("::1"),
+};
+
+   #+end_src
+   
+** however, this can be done just by an enum!
+   - to do this, we define that each of the enum variants will have a ~String~ associated with it
+   #+begin_src rust
+enum IpAddr {
+    V4(String),
+    V6(String),
+}
+
+let home = IpAddr::V4(String::from("127.0.0.1"));
+let loopback = IpAddr::V6(String::from("::1"));
+   #+end_src
+- this way, we don't need to define the additional struct to hold the address data!
+
+
+
+** enum variant types can have different types and amounts of associated data
+   - ok so watch this flexibilitym, that would not be possible with a struct
+   - IPv4 addresses always have four sets of three numbers in [0,255]
+   - if we wanted to store those four numbers themselves and still store the V6 address as a string, we could do the following
+   - 
+   #+begin_src rust
+enum IpAddr {
+    V4(u8, u8, u8, u8),
+    V6(String),
+}
+
+let home = IpAddr::V4(127, 0, 0, 1);
+let loopback = IpAddr::V6(String::from("::1"));
+   #+end_src
+
+  
+** working with IP addresses is so common  that the ~std~ library contains a definition for them
+  [[https://doc.rust-lang.org/std/net/enum.IpAddr.html][IpAddr in std::net - Rust]] 
+  - so the way it's implemented there is that there ARE structs for Ipv4Addr and Ipv6Addr, with are then included in the ~enum~ ~IpAddr~
+  - one thing is that since we haven't brought ~stdlib~ into scope, we can define our own versions no problem
+  - 
+
+** message enum demonstrating storage of different 
+   
+    - quit: has no data associated with it
+    - move: has named fields like a struct
+    - Write: has one String value
+    - ChangeColor: three i32's
+    #+begin_src rust
+// as an enum
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32,i32,i32),
+}
+
+// the equivalent structs
+struct QuitMessage; // unit struct
+struct MoveMessage {
+    x: i32,
+    y: i32,
+}
+struct WriteMessage(String); // tuple struct
+struct ChangeColorMessage(i32, i32, i32); // tuple struct
+
+    #+end_src
+
+** we can define methods on ~enums~ using ~impl~
+   #+begin_src rust
+impl Message {
+    fn call(&self) {
+        // ma method body
+    }
+}
+
+let m = Message::Write(String::from("hello"));
+m.call();
+   #+end_src
+   - in the example above, we are showing that ~m~ is the ~Write~ variant of the ~Message~ enum
+   
+** The ~Option~ Enum and its Advantages Over Null Values
+   - ~Option~ is another enum define in the standard library
+   - this enum is so common that it, AND its variants, are "included in the prelude" -> you don;t have to explicitly import them
+     - Aka you can call ~Some~, ~None~ without the ~Option~ prefix
+   - The ~Option~ enum covers the situation where a value may be something, or it may be nothing
+   - the advantage to covering this very common situation in this way as opposed to using Null is that the compiler is able to check all cases before compilation
+   - aka, avoids tons of errors that are possible due to the way the Null type is usually implemented
+
+*** the concept of null is good
+Null values handle the situation in which a value is either absent or invalid
+The implementation problem is that when a null value is used as a non-nul value, errors will result
+
+*** The ~Option~ Enum
+    #+begin_src rust
+enum Option<T> {
+    None,
+    Some(T),
+}
+    #+end_src
+- so, the variants are of the type Option<T>
+- 
+
+*** the <T> syntax
