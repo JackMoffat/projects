@@ -1,0 +1,37 @@
+#+title: Rust learning session #2
+#+DATE: [2021-12-30 Thu 19:54] 
+* 1.2 formatted print
+  shits complex bruh
+  https://doc.rust-lang.org/stable/rust-by-example/hello/print.html
+
+
+  Learning about various format strings and how to use them in the printing macros
+
+  
+* 1.2.1 Debug
+  - what is a ~trait~?
+  - ~derive~?
+  - what is the format #[derive(Debug)]?
+  - oh!! ok, so:
+    - fmt::Display traits, which aren't implemented automatically, are what we are calling when we write {}
+    - fmt::Debug traits, the ones that it says can be derived automatically for all ~std~ library types, are what we reference when we write {:?}
+  - pretty printing is accessed by writing {:#?}
+  - 
+
+* 1.2.2 Display
+  - implement ~fmt::Display~ methods to make things you want to print look better
+  - ~write!~ is used within this impl thing
+  - we import std::fmt so that we get access to fmt::<functions>
+  - then we ~impl~ fmt::Display ~for~ the ~struct~ we have defined, within the curly brackets
+  - ah! so the ~#[derive(Debug)]~ special syntax appears directly preceding a new struct definition
+  
+    
+* <2022-01-01 Sat 21:02> Diving back at display now, Feels Mighty Lovely
+  
+** starting @ second block
+   - first, ~#[derive(Debug)]~ allows us to get back whatever was fed into a ....function? or macro? to begin with
+   - we fought our way through trying to move the immovable object
+   - shit, I forgot to copy over the code. but thats ok.
+   - 
+   
+* finished 1.2.2!

@@ -1,0 +1,94 @@
+#+TITLE: rust session 3: 1.2.2.1, iterating formatting on list
+#+DATE: [2022-01-02 Sun 10:03] 
+* testcase: list
+  :LOGBOOK:
+  CLOCK: [2022-01-02 Sun 10:03]--[2022-01-02 Sun 10:33] =>  0:30
+  :END:
+  - so, here we are trying to implement fmt::Display for a list?
+  - each ~write!~ macro generates a fmt::Result - so????
+  - we need to deal with /all/ results
+  - so, rust provides the ~?~ operator
+    
+** the ~?~ operator
+
+   this will try the write macro for each list element, and if it errors will return the error
+ #+begin_example rust
+   write!(f, "{}", value)?;
+ #+end_example
+
+ - next, we implement ~fmt::Display~ for a ~Vec~ (a vector)
+
+   #+begin_src rust
+     use std::fmt; // import the 'fmt' module
+
+     // define a structure named `List` containing a Vec
+     struct List(Vec<i32>);
+
+     impl fmt::Display for List {
+         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+             // Extract the value using ...tuple indexing?....
+             // and create a reference to 'vec'
+             let vec = &self.0;
+
+             write!(f, "[")?; // creating an opening bracket THAT ISN'T A FULL LINE!
+
+             // iterating over the v's in vec while enumerating the iteration using count
+
+             for (count, v) in vec.iter().enumerate() {
+                 // fo erry element but not numba wun, add a comma <- more formatting
+                 // use the ? operator to return on errors
+                 if count != 0 { write!(f, ", ")?; } // don't add a comma on this item
+                 write!(f, "{}", v)?; // so, each variable or item I want to output requires it's own write macro
+                 write!(f, " is item {}", count); // e.g. this adds the count after each item
+             }
+
+             write!(f,"]") // this closes the bracket
+
+         }
+     }
+   #+end_src
+
+** Activity
+   try changing the program so that the index of each element in the vector is also printed.
+   new output should look like
+   #+begin_example rust
+   [0: 1, 1: 2, 2: 3]
+   #+end_example
+  
+  
+*** solution
+    #+begin_src rust
+      use std::fmt; // Import the `fmt` module.
+
+      // Define a structure named `List` containing a `Vec`.
+      struct List(Vec<i32>);
+
+      impl fmt::Display for List {
+          fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+              // Extract the value using tuple indexing,
+              // and create a reference to `vec`.
+              let vec = &self.0;
+
+              write!(f, "[")?;
+
+              // Iterate over `v` in `vec` while enumerating the iteration
+              // count in `count`.
+              for (count, v) in vec.iter().enumerate() {
+                  // For every element except the first, add a comma.
+                  // Use the ? operator to return on errors.
+                  if count != 0 { write!(f, ", ")?; }
+                  write!(f, "{}", count)?;
+                  write!(f, ": {}", v)?;
+              }
+
+              // Close the opened bracket and return a fmt::Result value.
+              write!(f, "]")
+          }
+      }
+
+      fn main() {
+          let v = List(vec![31, 55, 3]);
+          println!("{}", v);
+      }
+    #+end_src
+

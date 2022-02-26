@@ -1,0 +1,112 @@
+#+title: 1.2.3: Formatting
+#+date: [2022-01-02 Sun 10:44] 
+* Formatting
+  :LOGBOOK:
+  CLOCK: [2022-01-04 Tue 12:03]--[2022-01-26 Wed 11:40] => 527:37
+  - Note taken on [2022-01-04 Tue 10:45] \\
+    clockin back in
+  CLOCK: [2022-01-04 Tue 10:45]--[2022-01-04 Tue 12:03] =>  1:18
+  - Note taken on [2022-01-02 Sun 10:58] \\
+    we didn't really do too much right here right now because matt's groceries arrived
+  CLOCK: [2022-01-02 Sun 10:44]--[2022-01-02 Sun 10:58] =>  0:14
+  :END:
+ - so, there are different ways of formatting things like numbers
+   - format!("{}", foo) puts out a raw e.g. number
+   - format!("{:X}", foo) puts out the number as a hexadecimal value
+   - format!("{:o}", foo) yields an ~octal~ value -> e.g. base 8
+ - formatting is implemented by traits, and the traits depend on argument type, we usually use (or at least so far have primarily seen) the ~Display~ trait used for arguments of unspecified type ~{}~,
+ - oh hey, the block below explains the f!
+ #+begin_src rust
+   use std::fmt::{self, Formatter, Display};
+
+   struct City {
+       name: &'static str,
+       lat: f32,
+       lon: f32,
+   }
+
+   impl Display for City {
+       // `f` is a buffer, and this method must write the formatted string into it!
+
+       fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+           let lat_c = if self.lat >= 0.0 { 'N' } else { 'S' };
+           let lon_c = if self.lon >= 0.0 { 'E' } else { 'W' };
+
+
+           // "write! is  like `format!`, but it will write the formatted string
+           // into a buffer (the first argument)
+           write!(f,"{}: {:.3}deg {} {:.3} deg {}",
+                  self.name, self.lat.abs(), lat_c, self.lon.abs(), lon_c)
+       }
+   }
+
+   #[derive(Debug)]
+   struct Color {
+       red: u8,
+       green: u8,
+       blue: u8,
+   }
+
+   fn main {
+       for city in [
+           City { name: "Dublin", lat: 53.347778, lon: -6.259722 },
+           City { name: "Oslo", lat: 59.95, lon:10.75 },
+           City { name: "Vancouver", lat: 49.25, lon: -123.1 },
+       ].iter() {
+           println!("{}", *city) // is the star in front of city here to make it work with the loop?
+       }
+       for color in [
+           Color { red: 128, green: 255, blue: 90 },
+           Color { red: 0, green: 3, blue: 254 },
+           Color { red: 0, green: 0, blue: 0 },
+       ].iter() {
+           // make this use {} once you make a fmt::Display implemenetation
+           println!("{:?}", *color) // heres that star notation again
+       }
+   }
+ #+end_src
+so, {.<int>} is the precision of the shit you're fucking with
+
+#+end_src
+* my implementation of display for color 
+  #+begin_src rust
+    impl Display for Color {
+        fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+
+            // either of these methods work
+            // method #1
+            // let hex = format!("0x{r:02X}{g:02X}{b:02X}", r=self.red, g=self.green, b=self.blue);
+            // write!(f, "RGB ({}, {}, {}) {}", self.red, self.green, self.blue, hex);
+            // method #2 - shorter, slightly less clear
+            write!(f, "RGB ({r}, {g}, {b}) 0x{r:02X}{g:02X}{b:02X}", r=self.red, g=self.green, b=self.blue)
+
+        }
+    }
+  #+end_src
+* the remainder of the code
+#+begin_src rust
+
+  fn main() {
+      for city in [
+          City { name: "Dublin", lat: 53.347778, lon: -6.259722 },
+          City { name: "Oslo", lat: 59.95, lon: 10.75 },
+          City { name: "Vancouver", lat: 49.25, lon: -123.1 },
+      ].iter() {
+          println!("{}", *city);
+      }
+      for color in [
+          Color { red: 128, green: 255, blue: 90 },
+          Color { red: 0, green: 3, blue: 254 },
+          Color { red: 0, green: 0, blue: 0 },
+      ].iter() {
+          // Switch this to use {} once you've added an implementation
+          // for fmt::Display.
+          println!("{}", *color);
+      }
+  }
+
+#+end_src
+
+Ok wow, we did it!
+
+[[https://doc.rust-lang.org/stable/rust-by-example/hello/print/fmt.html][the formatting traits page was really helpful]]

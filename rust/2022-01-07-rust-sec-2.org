@@ -1,0 +1,57 @@
+#+options: ':nil *:t -:t ::t <:t H:3 \n:nil ^:{} arch:headline author:t
+#+options: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+options: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+options: tasks:t tex:t timestamp:t title:t toc:t todo:t |:t
+#+title: 2022-01-07-rust-sec-2
+#+date: <2022-01-07 Fri>
+#+author: Jack M
+#+email: jackmoffat@hotmail.com
+#+language: en
+#+select_tags: export
+#+exclude_tags: noexport
+#+creator: Emacs 27.2 (Org mode 9.4.5)
+* startup
+  mostly going through semi-random stuff.
+
+  not a whole lot of time before my meeting, but getting VSCODE set up for matt
+** got markdownlint installed
+   apparently, asterisks start by *italic* then **bold** then ***both***
+   headlines are with ###
+* 2.1 primitives [0/3]
+   - it has 8,m 16, 32, yada yada integers
+   - signed vs unsigned integers
+   - [ ] what is the isize / usize scalar? it says pointer size, but the fuck that means bruh
+   - it can take unicode values
+   - [ ] what is the unit type? ~unit type (), whose only possible value is an empty tuple and is not considered a compound type because always empty~
+   - [ ] 
+* compound types
+  - so, can arrays have multiple types or must they be the same type? example given was [1, 2, 3] vs the tuple of (1,true)
+  - variables can be type annotated
+  - aka different ways of specifying the type the variable should be
+#+begin_src rust
+  fn main() {
+      // Variables can be type annotated.
+      let logical: bool = true;
+      let a_float: f64 = 1.0;  // Regular annotation
+      let an_integer   = 5i32; // Suffix annotation
+      // Or a default will be used.
+      let default_float   = 3.0; // `f64`
+      let default_integer = 7;   // `i32`
+      // A type can also be inferred from context
+      let mut inferred_type = 12; // Type i64 is inferred from another line
+      inferred_type = 4294967296i64;
+      // A mutable variable's value can be changed.
+      let mut mutable = 12; // Mutable `i32`
+      mutable = 21;
+      // Error! The type of a variable can't be changed.
+      mutable = true;
+      // Variables can be overwritten with shadowing.
+      let mutable = true;
+  }
+#+end_src
+* ok, so!
+  the type of a variable can't be changed once established, as it says nearly verbatim above
+  only future questions I imagine I'll have here are perhaps about the compound types, and the unit type thing.
+  Also, what exatly is shadowing?
+  
+
