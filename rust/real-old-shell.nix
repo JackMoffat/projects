@@ -9,10 +9,11 @@
       rustup
       xorriso
       grub2
-      qemu
+      #qemu
       llvmPackages_latest.lld
       python3
     ];
+
     RUSTC_VERSION = pkgs.lib.readFile ./rust-toolchain;
     # https://github.com/rust-lang/rust-bindgen#environment-variables
     LIBCLANG_PATH= pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_latest.libclang.lib ];
@@ -38,7 +39,7 @@
     # Includes with normal include path
     (builtins.map (a: ''-I"${a}/include"'') [
       pkgs.libvmi
-      pkgs.glibc.dev 
+      pkgs.glibc.dev
     ])
     # Includes with special directory paths
     ++ [
