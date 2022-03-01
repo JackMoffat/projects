@@ -214,3 +214,52 @@ C
 ./exercises 
 ./exercises 
 ./exercises 
+ls
+cd ../..
+l
+vi Cargo.toml 
+cat Cargo.toml 
+cat Cargo.toml | less
+l
+cd ..
+rm -rf iced-repo/
+cd iced/
+l
+find -name "Cargo.toml" 
+which x11
+which libX11
+nix-env --query 
+nix-env -q
+nix-shell -q
+nix-shell --help
+l
+exit
+which
+which libXls
+which libX11
+which libx11
+l
+nix-shell --packages 
+cd ~/projects/rust/
+l
+vi shell.nix 
+exit
+exit
+vi shell.nix 
+exit
+vi shell.nix 
+l
+Xorg 
+vi shell.nix 
+exit
+cd iced-experiments/iced/examples/tour/
+l
+cargo 
+cargo run
+vi ~/projects/rust/shell.nix 
+nox vulcan
+cargo run --features "/home/jackm/projects/rust/iced-experiments/iced/glow iced/glow_canvas" --package game_of_life
+cargo run --features "iced/glow iced/glow_canvas" --package game_of_life
+nox wgpu
+vi ~/projects/rust/shell.nix 
+exit

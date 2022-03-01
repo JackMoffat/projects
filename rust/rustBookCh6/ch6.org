@@ -150,7 +150,38 @@ enum Option<T> {
     Some(T),
 }
     #+end_src
-- so, the variants are of the type Option<T>
-- 
+*** the <T> syntax and the type differences it causes
+- so, the variants are of the type ~Option<T>~
+- the =T= is a "generic type parameter" -> more in ch. 10
+- "for now, all you need to know is that ~<T>~ means the ~Some~ variant of the ~Option~ enum can hold one piece of data at any time, and that each concrete type that gets used in palce of ~T~ makes the overall ~Option<T>~ type a different type"
+#+begin_src rust
+let some_number = Some(5); // type is Option<i32>
+let some_string = Some("a string"); // type is Option<&str>
 
-*** the <T> syntax
+let absent_number: Option<i32> = None; 
+#+end_src
+-  we *annotate the type* for the example of ~absent_number~ above, because rust can't infer from the ~None~ value that we want the type of ~absent_number~ to be ~Option<i32>~
+- effectively what will get returned from the examples below are values of the type ~Option<<whatever type>>~, instead of just ~<Type>~
+
+#+begin_src rust
+let x: i8 = 5;
+let y: Option<i8> = Some(5);
+
+let sum = x + y;
+#+end_src
+- this is where the error will be: can't add an ~i8~ to an ~Option<i8>~
+- "in short, because they are different types, the compiler won't let us use an ~Option<T>~ /as if it were definitely a valid value/"
+*** why have this variation in type?
+    - we have this difference because it allows us to compare whether a value is safe, and will always exist, or whether there may or may not be a value there
+*** TODO rewrite this section
+    - eliminating the rrisk of incorrectly assuming a not-null value helps you to be more confident in your code. In order to have a value that can possibly be null, you must explicitly opt-in by making the type of that value ~Option<T>~
+*** so, how do you get the ~T~ value out of a ~Some~ variant?
+    - ~Option<T>~ has a very large number of available methods
+    - they will be extremely useful
+    - highly recommended to check out the  [[https://doc.rust-lang.org/std/option/enum.Option.html][documentation for ~Option<T>~ methods]]
+*** To use ~Option<T>~ values (in general), you must have code to handle each variant
+    - you want code for if you have a ~Some(T)~ value that is able to use the inner ~T~
+    - you want code for if you have a ~None~ value, "and that code doesn't have a ~T~ value available.
+    - ooh here we go, the ~Match~ expression!
+
+    

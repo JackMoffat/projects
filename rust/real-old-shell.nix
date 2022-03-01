@@ -1,5 +1,4 @@
 { pkgs ? import <nixpkgs> {} }:
-
   pkgs.mkShell rec {
     buildInputs = with pkgs; [
       rustc
@@ -26,7 +25,6 @@
     # may need extra variable in the elisp form for rls, but may be fixed by "which rls"
     shellHook = ''
       echo "((nil . ((cargo-process--custom-path-to-bin . \"$(which cargo)\"))))" > .dir-locals.el
-
       export rls=$(which rls)
       export PATH=$PATH:~/.cargo/bin
       export PATH=$PATH:~/.rustup/toolchains/$RUSTC_VERSION-x86_64-unknown-linux-gnu/bin/
