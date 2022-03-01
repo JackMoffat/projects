@@ -183,5 +183,119 @@ let sum = x + y;
     - you want code for if you have a ~Some(T)~ value that is able to use the inner ~T~
     - you want code for if you have a ~None~ value, "and that code doesn't have a ~T~ value available.
     - ooh here we go, the ~Match~ expression!
+* 6.2 the =match= control flow construct
+  :PROPERTIES:
+  :header-args:rust: :tangle ./ch6-2/src/main.rs
+  :END:
+  - match allows comparison of values against a series of patterns, and then to execute code based on the match.
+  - main benefit here is that the compiler is able to confirm that all possible cases have been handled
+** example
+#+begin_src rust
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter,
+}
 
-    
+
+fn value_in_cents(coin: Coin) -> u8 {
+    match coin {
+        Coin::Penny => {
+            println!("lucky penny!!!!");
+            1},
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin::Quarter => 25,
+    }
+}
+#+end_src
+- new syntax: the pattern and the code in the match arm are separated by ~=>~
+- the number (5,10,25) is the code to be run
+- the first match shows how we execute multiple lines of code within a =match= arm: we enclose it withinc urly brackets
+** patterns that bind to values
+   - "Another useful feature of match arms is that they can bind to the parts of the  values that match the pattern"
+   - since it binds to the parts of the values, they can extract values from ~enum~ variants
+- the pretext for the example below is that US states had specific back side variant pictures, so we've added a value called ~UsState~ to be contained within the ~Quarter~ variant of an enum
+   #+begin_src rust
+#[derive(Debug)]
+enum UsState {
+    Alabama,
+    Alaska,
+    // --more states--
+}
+
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(UsState),
+}
+
+
+fn value_in_cents(coin: Coin) -> u8 {
+    match coin {
+        Coin::Penny => 1,
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin::Quarter(state) => {
+            println!("State quarter from {:?}!", state);
+            25
+        }
+    }
+}
+
+   #+end_src
+- so in the updated ~value_in_cents~ fn, now the passed-in value of ~Coin::Quarter(UsState::Alaska)~, ~coin~ would proceed until it reaches ~Coin::Quarter(state)~
+- then, ~state~ is ~UsState(Alaska)~, which is accessible to the ~println!~ macro
+** Matching with ~Option<T>~
+- "instead of comparing coins, we'll compare the variants of ~Option<T>~ but the way the match expression works remains the same"
+  - goal of the above is to get the inner ~T~ value out of a ~Some~ case <- I don't remember doing this in the previous section?
+- ah right, ~Some~ and ~None~ are variants of the ~Option~ enum that are automatically imported during the prelude because of how common they are ,_ and ~Some~ / ~None~ are both accessible without prefixing.
+#+begin_src rust
+fn plus_one(x: Option<i32>) -> Option<i32> {
+    match x {
+        None => None,
+        Some(i) => Some(i + 1),
+
+    }
+}
+let five = Some(5); // an enum of type ~Option<i32>~
+let six = plus_one(five);
+let none = plus_one(None);
+#+end_src
+- here, the variable within ~plus_one~ is Some(5). When that matches the Some(i) arm, it will then bind 5 to i and return the value 6
+- in the case with ~None~, it matches ~None~ and returns ~None~
+*** matches are sequential, and they will throw errors at compile time if you've put a catch-all arm before a more specific arm
+
+    - in the previous code block, had we not included a pattern to deal with ~None~ (aka, when a value is not present), the code would not have compiled
+    - this is an example of Rust catching all the possible cases at compile-time
+    - "..Rust prevents us from forgetting to explicitly handle the ~None~ case, it protects us from assuming we have a value when we might have null..", thus preventing the billion-dollar mistake
+*** Catch-All Patterns And The _ Placeholder
+    - if you roll a three, specific action
+    - if you roll a seven, specific action
+    - otherwise, you move a certain number of spaces in some imaginary game
+      - for that last arm, have we just /named/ it other or is other a special word?
+    - and we are USING the value passed as other in this case
+    - when we dont wan't to /use/ the value that may be present in other, we can use the catch-all pattern _~
+    - ~_~ will match any value and then *not bind to that value*
+    - this way, rust won't warn us about an unused variable
+    - say if we want the player to have to reroll when they don't roll a 3 or a 7, we can use the ~_~ operator instead of ~other~ because we don't care about the value and want it thrown away, OR if we want it to just do nothing aka pass the player's turn, we can do that using the unit value ~()~
+    #+begin_src rust
+let dice_roll = 9;
+match dice_roll {
+    3 => add_fancy_hat(),
+    7 => remove_fancy_hat(),
+    other => move_player(other), // using the value
+    _ => reroll(), // calling a function that does not use the value because _ throws it away
+    _ => (), // doing nothing whatever by passing the unit value and not using the value because _ throws it away
+}
+
+
+fn add_fancy_hat() {}
+fn remove_fancy_hat() {}
+fn move_player(num_spaces: u8) {}
+fn reroll() {}
+    #+end_src
+** next up: concise control flow with ~if let~
