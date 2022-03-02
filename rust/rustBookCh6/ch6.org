@@ -8,7 +8,6 @@
    - then pattern matching w/ ~match~
    - then, ~if / let~ 
 
-     
 * 6.1 defining an enum
   :PROPERTIES:
   :header-args:rust: :tangle ./ch6-1/src/main.rs
@@ -34,7 +33,7 @@ fn route(ip_kind: IpAddrKind) {}
    - so, subtypes of an enum are accessible using the double colon syntax - that is how they are namespaced
    - now we can create functions that take either ~type~, because the type of each is ~IpAddrKind~
    
-   
+     
 ** ok, so now combining enums and structs
    - wow, this seems quite useful in order to associate the address w/ the type of enum
    #+begin_src rust
@@ -299,3 +298,78 @@ fn move_player(num_spaces: u8) {}
 fn reroll() {}
     #+end_src
 ** next up: concise control flow with ~if let~
+* 6.3 Concise Control Flow With =If Let=
+  :PROPERTIES:
+  :header-args:rust: :tangle ./ch6-3/src/main.rs
+  :END:
+
+  The =if let= syntax - more concise way to match one pattern to control the rest
+
+** if vs match
+*** match
+  - the block below shows code where a ~match~ only executes code when a value is ~Some~
+  - (as a side note, the value of Some here is 3 and it's type is u8)
+  #+begin_src rust
+let config_max = Some(3u8);
+match config_max {
+    Some(max) => println!("The maximum is configured to be..... {}", max)
+        _ => (), 
+}
+  #+end_src
+  - the ~_ => ()~ line satisfies the match expression, but is basically boilerplate
+  
+*** match - interesting syntax
+    here's how we can do it more concisely with ~if let~
+    - the code in this ~if let~ expression will only run if the value is 
+    #+begin_src rust
+let config_match = Some(3u8);
+if let Some(max) = config_max { // this seems syntacticall odd / almost reversed to me but that's ok
+    println!("the max is configured to be {}", max);
+}
+
+    #+end_src
+    - so in the if, it's basically saying *if* the type of the value it is given is Some(<x>), then execute the code in the brackets
+    - oh, jimbus. Thanks Matt for the explanation - we're literally just combining the if and the let. we use let all the time for assignment anyways
+    - within that expression, the value of ~max~ will be whatever was within the ~Some(<x>)~ type it was originally given
+    - Ah, because the ~if let~ takes:
+      1. First, a pattern
+      2. then, the expression to use
+    - this way, the expression is given to ~match~
+   
+    - Advantage to ~if let~ is shorter, less typing, easier to take
+
+    - disadvantage is that you lose the "exhaustive type checking that ~match~ enforces"
+
+    - 
+
+*** you can also include ~else~ with ~if let~
+    - here, the ~else~ code is equivalent to the ~_ => <code>~ in the full match expression
+      here's how we'd write something to count all non-quarter coins, using the ~Coin~ enum we made earlier
+    #+begin_src rust
+let mut count = 0;
+match coin {
+    Coin::Quarter(state) => println!("state quarter from {:?}!!!", state),
+    _ => count += 1,
+}
+    #+end_src
+- and here's how we'd do it with ~if let else~
+#+begin_src rust
+let mut count = 0;
+if let Coin::Quarter(state) = coin {
+    println!("STATE QUARTER WOOO from {:?}", state);
+} else {
+    count += 1;
+}
+#+end_src
+
+*** summmary
+    "If you have a situation in which your program has logic that is too verbose to express using a ~match~, remember that ~if let~ is in your rust toolbox as well"
+    We've shown:
+    - creating custom ~enum~ types
+    - how standard library's ~Option<T>~ can be used to prevent errors with potential values
+    - using ~match~, and ~if let~ to extract values
+    - 
+   "Your Rust programs can now express concepts in your domain using structs and enums."
+   Creating custom types in the API ensures type safety <- lets the compiler help ye out
+   
+*** Next up: organizing through modules
