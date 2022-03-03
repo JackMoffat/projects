@@ -1,0 +1,90 @@
+* managing growing projects with packages, crates, and modules
+ [[https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html][Managing Growing Projects with Packages, Crates, and Modules - The Rust Progr...]] 
+  basically, how to organize code in larger projects
+  - splitting code into multiple modules and multiple files
+  - packages can contain more than one binary crate, and one optional library crate
+  - stuff can be pulled out into separate crates as the project grows
+  - we will also be going into scope more here
+ 
+** features that allow for code organization
+   - they describe it as "which details are exposed, which details are private, and what names are in scope"
+   - I'm a bit unclear as to this exposed details / api / private concept in programming in general
+  
+*** packages: Cargo features that let you build, test, and share crates
+    
+*** crates: a tree of modules that produces a library or executable
+    
+*** modules and use: allow for organization, scope, and privacy of paths
+    
+*** paths: a way of naming an item - such as a struct, function, or module
+    
+* 7.1 packages and crates
+ - crates:
+ - package: one or more crates that provide a set of functionality
+   - contains a =Cargo.toml= file containing the instructions for building the crates in the package
+   - can have >= 0 binary crates, <=1 library crates, and must have at least one crate
+     - {B, L ∈ ℕ | L ≤ 1, B + L > 0}
+
+** cargo new
+   - creates a =Cargo.toml= file
+   - cargo file has the name of the package, version of cargo, and the edition
+   - it doesn't mention src/main.rs because the convention is that =src/main.rs/ is "the crate root of a binary crate with the same name as the package"?
+   - cargo also knows that if the package directory contains =src/lib.rs=, the package contains a library crate with the same name as the package that has =src/lib.rs/ as it's crate root
+   - cargo passes crate root files (eg. src/main.rs, src/lib.rs) to ~rustc~ which builds the library or binary
+   - with a brand-new project there will be only src/main.rs, therefore there is only one binary crate with the same name as the project
+   - packages can have multiple binary crates by putting files in the src/bin directory -> each file will be a separate crate
+   - 
+
+** crates group functionality within a scope so that said functionality is easy to share between projects
+   for example, the ~rand~ crate used in ch.2
+   - this prevents name conflicts
+   - we could access our struct named ~Rng~ and the ~rand~ crate's trait ~Rng~ because it is namespaced under ~rand::Rng~
+   - 
+
+* 7.2 modules: controlling scope and privacy
+  - modules: organize code for legibility and reuse
+  - paths: allow to for naming items
+  - ~use~ : bring paths into scope
+  - ~pub~ : make items public
+  - ~as~ :
+
+    
+** public vs private privacy
+- public: allows code to be used by outside code
+- private: "internal implementation detail and not available to outside use"
+
+*** example of using modules in a restaurant
+    - front of house is where customers are, 
+    - back of house is where chefs cook, people clean, managers do admin work
+
+#+begin_src rust :tangle "restaurant/src/lib.rs"
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        let result = 2 + 2;
+        assert_eq!(result, 4);
+    }
+}
+
+mod front_of_house {
+    fn add_to_waitlist() {}
+
+    fn seat_at_table() {}
+
+}
+
+mod serving {
+    fn take_order() {}
+
+    fn serve_order() {}
+
+    fn take_payment() {}
+}
+
+#+end_src
+- modules are defined by starting with ~mod~ keyword
+- modules can be nested
+- modules can hold defs for structs, enums, constants, functions, etc
+- modules allow for grouping related items and showing why they are related
+- both src/main.rs and src/lib.rs are crate roots -> they complete a module called (in my case) ch7, at the root of the "module tree"
