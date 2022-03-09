@@ -88,3 +88,108 @@ mod serving {
 - modules can hold defs for structs, enums, constants, functions, etc
 - modules allow for grouping related items and showing why they are related
 - both src/main.rs and src/lib.rs are crate roots -> they complete a module called (in my case) ch7, at the root of the "module tree"
+
+*** compilation of this section yields errrors
+The messsages will say that the module ~hosting~ in private
+
+*** modules define "privacy boundaries"
+- to make structs, functions, etc. private you can put them in a module
+- all items in rust are private by ddefault.
+- items in parent modules /can't/ access private items in child modules
+- items in child modules /can/ access items in "ancestor"(parent??) modules
+- this is because child modules can see the context they're defined
+
+*** Exposing paths with the ~pub~ keywordd
+- below, we want to allow a function in the parent module to have access to a function in the child module
+- we can change ~hosting~ to be public by adding ~pub~, but what is contained inside the module is still private
+- pub on a module just makes it so that it can be referred to by ancestor modules
+- to make a specific function, struct, piece of data public we must add the ~pub~ keyword in front of it too.
+-
+#+begin_src rust
+mod front_of_house {
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
+    }
+}
+
+pub fn eat_at_restaurant() {
+    // absolute  path
+    crate::front_of_house::hosting::add_to_waitlist();
+
+    // relative path
+    front_of_house::hosting::add_to_waitlist();
+}
+#+end_src
+- this will compile
+- front_of_house is not public, BUT!
+- because eat_at_restaurant function is defined in same moduole ads front of house,  we can refer to front of house from eat at restaurant
+- ah, so theyre not both wrapped in a module statement but they are defined at the same "tier" in the same file, so therefoe they are siblings
+- absolute paths star from the root of the craete's module tree which here is ~crate~?
+- relative paths start from ~front_of_house~ -> since this is defined at the same level of eat at restaurant it....ah, hands are too cold. but iwll come backm to this later
+
+  
+  
+*** starting relative patjhs wirth super
+- super is described as being similkar to the ~..~ syntax
+-
+#+begin_src rust
+fn serve_order() {}
+
+mod back_of_house {
+    fn fix_incorrect_order() {
+        cook_order();
+        super::serve_order();
+    }
+    fn cook_order() {}
+}
+#+end_src
+
+ah, ok, so it gets us up to the parent module of back_of_house (*not* of ~fix_incorrect_order~)
+- if we expect that all of these parts of stay in te samerelationshjip, that is, we expect thjat back_of_house and server_oder will remain within the same (file? module? relative relationship?), then writing ~super~ allows usto haveless code to update bwcuase we don't need to update the specific writing of a relative or absolute path
+
+*** making structs and enums public
+
+**** structs
+- it is often useful for structs to have private fields
+- there are some extra details in making structs adn enums public
+- pub would make a stuct public but none of it's fields
+- fields can be made individuallly publixc
+- in te example below, we're modellinga  case wheree customers can pick they type of bread they want, but the fruit choice is ipto tje chef
+- since the fruit can change quickly, customer's can't choose or see what they get
+#+begin_src rust
+mod back_of_house {
+    pub struct Breakfast {
+        pub toast: String,
+        seasonal_fruit: String,
+    }
+
+    impl Breakfast {
+        pub fn summer(toast: &str) -> Breakfast {
+            Breakfast {
+                toast: String::from(toast),
+                seasonal_fruit: String::from("peaches"),
+            }
+        }
+    }
+}
+
+pub fn eat_at_restaurant() {
+    // Order a breakfast in the summer with Rye toast
+    let mut meal = back_of_house::Breakfast::summer("Rye");
+    // Change our mind about what bread we'd like
+    meal.toast = String::from("Wheat");
+    println!("I'd like {} toast please", meal.toast);
+
+    // The next line won't compile if we uncomment it; we're not allowed
+    // to see or modify the seasonal fruit that comes with the meal
+    // meal.seasonal_fruit = String::from("blueberries");
+}
+#+end_src
+- so here, 
+  
+**** enums
+- it is basicaly never useful to have enums with private variants so by default they are public
+- with enums, if we make an enum public all of its variants will become public as well
+
+** next up: the ~use~ keyword, combining ~pub~ and ~use~
+
