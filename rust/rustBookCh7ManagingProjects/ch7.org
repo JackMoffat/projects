@@ -52,8 +52,8 @@
 ** public vs private privacy
 - public: allows code to be used by outside code
 - private: "internal implementation detail and not available to outside use"
-
-*** example of using modules in a restaurant
+* 7.3 Paths For Referring To An Item In The Module Tree
+*** Example of using modules in a restaurant
     - front of house is where customers are, 
     - back of house is where chefs cook, people clean, managers do admin work
 
@@ -190,6 +190,21 @@ pub fn eat_at_restaurant() {
 **** enums
 - it is basicaly never useful to have enums with private variants so by default they are public
 - with enums, if we make an enum public all of its variants will become public as well
+
+**** Example showing how making an enum public makes its variants public
+#+begin_src rust
+mod back_of_house {
+    pub enum Appetizer {
+        Soup,
+        Salad,
+    }
+}
+
+pub fn eat_at_restaurant() {
+    let order1 = back_of_house::Appetizer::Soup;
+    let order2 = back_of_house::Appetizer::Salad;
+}
+#+end_src
 
 ** next up: the ~use~ keyword, combining ~pub~ and ~use~
 
