@@ -1,2 +1,11 @@
 exit
 exit
+l
+iced
+cd iced/
+l
+cd ..
+cd src/
+l
+cargo 
+cargo run main.rs 
