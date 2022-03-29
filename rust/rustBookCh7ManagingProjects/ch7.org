@@ -47,8 +47,6 @@
   - ~use~ : bring paths into scope
   - ~pub~ : make items public
   - ~as~ :
-
-    
 ** public vs private privacy
 - public: allows code to be used by outside code
 - private: "internal implementation detail and not available to outside use"
@@ -207,4 +205,165 @@ pub fn eat_at_restaurant() {
 #+end_src
 
 ** next up: the ~use~ keyword, combining ~pub~ and ~use~
+* 7.4 Bringing Paths into Scope with the ~use~ part Keyword
+**  by using the ~use~ keyword, we can bring a path into scope once and then call the items in that path as if they were local items
+#+begin_src rust
+mod front_of_house {
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
+    }
+}
 
+use crate::front_of_house::hosting;
+
+pub fn eat_at_restaurant() {
+    hosting::add_to_waitlist;
+    hosting::add_to_waitlist;
+    hosting::add_to_waitlist;
+}
+#+end_src
+- this process is described similar to creating a symbolic link in the filesystem.
+- Adding ~use crate::front_of_house::hosting~ in the =crate root= brings ~hosting~ into scope as a local item
+- this also will check the privacy
+** you can also bring items into scope with ~use~ and a relative path
+#+begin_src rust
+/*--snip--*/
+
+use self::front_of_house::hosting;
+
+/*--snop--*/
+#+end_src
+
+** creating iodiomatic ~use~ paths: for functions, vs. structs
+- WHat what is an idiom, again?
+- you could also specify the entire path of the ~add_to_waitlist~ function e.g. ~crate::front_of_house::hosting::add_to_waitlist;~, but this would be "un-idiomatic?"
+- having to specify the parent module when calling the function (eg. ~use crate::front_of_house::hosting;~, means that subsequent calls to the function will require specif
+ying the function's source module when calling the function and makes it clear where that function is defined
+
+- this behavior is *not* followed when calling in paths for structs, enums, and other items, however. The idiomatic way is to specify the full path.
+#+begin_src rust
+use std::collections::HashMap;
+
+fn main() {
+    let mut map = HashMap::new();
+    map.insert(1, 2);
+}
+#+end_src
+
+- this idiom has no strong reason behind this convention.
+- the exception is when two things will have the same name: this won't be possible
+- 
+
+#+begin_src rust
+use std::fmt; // this provides a Result
+use std::io; // this also provides a Result
+
+fn function1() -> fmt::Result {
+    // --snip--
+}
+
+fn function2() -> io::Result<()> {
+    // --snip
+}
+#+end_src
+so, because here ~Result~ could be pulled from either module, we need to be explicit about which one we are going for.
+
+** providing new names with the ~as~ keyword
+#+begin_src rust
+use std::fmt::Result;
+use std::io::Result as IoResult;
+
+fn function1() -> Result {
+    // --snip
+}
+
+fn function2() -> IoResult<()> {
+    // --snip
+}
+#+end_src
+- yeah, so the above is just like python's ~use numpy as np~
+- 
+
+** re-exporting names with ~pub use~
+- when a name is brought into scope with ~use~, the name in the new scope is private
+- hmm, ok, so I should probably go through exactly what the implications of this are
+
+
+
+
+
+** using external packages
+- we can add external packages to our cargo.tom with 'rand = "0.8.3"'
+- adding packages to cargo.toml tells cargo to download the ~rand~ package, as well as any dependencies
+- then we can call ~rand~ into scope with a ~use~ line
+- packages included in ~std~ (the standard library) don't need to be brought into scope in the same way, but we do still call them into scope using ~use~
+-
+
+**  using nested paths to clean up large ~use~ lists
+- use lists like the one below can rapidly grow to take up large amounts of vertical space in code
+#+begin_src rust
+use std::cmp::Ordering;
+use std::io;
+// the quicker ways
+use std::{cmp::Ordering, io};
+
+
+// example 2
+use std::io;
+use std::io::Write;
+
+
+// we can nest these two paths using self
+use std::io;
+use std::io::Write;
+use std::io::{self,Write};
+#+end_src
+
+** The glob operator
+- glob works like how I've seen it before: if we want to bring all public items defined in a path into scope, we can specify thta path followed by ~*~, the glob operator:
+#+begin_src rust
+use std::collections::*;
+#+end_src
+- the downside to glob is that it brings EVERYTHING under the path into scope
+- this can make it harder to see what paths are within scope
+
+* 7.5 Separating Modules Into Different Files
+- all examples tus far have defined multiple modules in one file
+- splitting them up when the modules get large can make them easier to navigate
+- "in this case, the crate root is /src/lib.rs/ but this procedure also works with binary crates whose crate root file is /src/main.rs/"
+#+begin_src rust :tangle "src/lib.rs"
+mod front_of_house;
+
+pub use crate::front_of_house::hosting
+
+pub fn eat_at_restaurant() {
+    hosting::add_to_waitlist();
+    hosting::add_to_waitlist();
+    hosting::add_to_waitlist();
+}
+#+end_src
+
+    
+- using a semicolon after ~mod front_of_house~ (rather than using a block?) tells rust to
+  " load the contents of the module from another file with the same name as the module"
+#+begin_src rust :tangle "src/front_of_house.rs"
+pub mod hosting;
+#+end_src
+  - "to continue and extract the ~hosting~ module to it's own file as well we change /src/front_of_house.rs/ to contain only the declaration of the hosting module"
+#+begin_src rust :tangle "src/front_of_house/hosting.rs"
+pub fn add_to_waitlist() {}
+#+end_src
+- with the changes above, the module tree remains the same and the calls in ~eat_at_restaurant~ work without modifications, 
+BUT the definitions live in different files
+- this lets you move modules to new files as they grow in size
+*** note
+- ~pub use crate::front_of_house::hosting~ in /src/lib.rs/ also hasn't changed, nor does ~use~ have any impact on what files are complied aspartof the crate. 
+- The ~mod~ keyword declares modules, and rust looks in a file with the same name as the module for the code that goes into that module
+- Qn: is this the same as when the two things were identically named earlier on in the chapters?
+- this will definitely feel more applicable when we're dealing with large projects: right now it's just showing us the basics of this method of organization
+- 
+AHH, RIGHT! if you look at a diagram of the directory structure, tje it makes sense
+
+
+** Next up:
+we will look at the collections in Ch. 8
