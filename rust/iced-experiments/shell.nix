@@ -14,10 +14,18 @@ let
 in
   pkgs.mkShell rec {
     buildInputs = with pkgs; [
+      # https://github.com/iced-rs/iced/issues/256
       rust-bin.stable.latest.default
       rust-analyzer
       xorg.libX11
-      python3
+      xorg.libXcursor
+      xorg.libXi
+      xorg.libXrandr
+      libGl
+      freetype
+      pkgconfig
+      freetype.dev
+      expat
       #wgpu-utils
       #rustc
       #rustup
@@ -27,6 +35,7 @@ in
       #xorriso
       #grub2
       #llvmPackages_latest.lld
+      python3
     ];
     #RUSTC_VERSION = pkgs.lib.readFile ./rust-toolchain;
     # https://github.com/rust-lang/rust-bindgen#environment-variables
