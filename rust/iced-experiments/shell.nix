@@ -40,6 +40,9 @@ in
     #RUSTC_VERSION = pkgs.lib.readFile ./rust-toolchain;
     # https://github.com/rust-lang/rust-bindgen#environment-variables
     #LIBCLANG_PATH= pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_latest.libclang.lib ];
+    LD_LIBRARY_PATH = builtins.foldl'
+      (a: b: "${a}:${b}/lib") "${vulkan-loader}/lib" buildInputs;
+
     HISTFILE=toString ./.history;
     # I added the export cargo line below
     # the export PATH should fail. but wait, now I do have a .cargo?
