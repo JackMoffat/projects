@@ -26,6 +26,7 @@ in
       pkgconfig
       freetype.dev
       expat
+      libxkbcommon
       #wgpu-utils
       #rustc
       #rustup
