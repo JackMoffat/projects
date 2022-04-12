@@ -267,12 +267,14 @@ Strings are complicated
 - what this means in rust is that more thought around UTF8 characters is required up-front, but this yields a safer program
 
 * 8.3 - Hash Maps
+:PROPERTIES:
+:header-args:rust: :tangle ./ch8-3/src/main.rs
+:END:
 - hash maps store a map of keys (type ~K~) to values (type ~V~) through the use of a hashing function
 - lots of languages implement this functionality, but it is often called something similar like =hash, map, object, hjash table, dictionary, associative array=
 - type ~HashMap<K, V>~
 - Hash maps allow you to use a key of any type to look up an associated value, without relying on an index
 - standard library has a lot of extra great info on hash maps and related functions
-
 ** Creating a new hash map - example of sports scores
 - import hash map
 - we then create a new mutable hash map called ~scores~
@@ -310,5 +312,74 @@ let mut scores: HashMap<_, _> =
      - the first parameter in ~zip~ is ~self~ -> therefore since the method is called on ~teams~, that is the first element in the resulting tuple
      - second parameter is the iterator that will be zipped to the first
   3. now ~.collect()~ is what turns that zipped double-iterator thing from a (iterator or tuple?) into a ~HashMap~
-     
  
+** Hash maps and ownership
+#+begin_src rust
+use std::collections::HashMap;
+
+let field_name = String::from("Favorite Color");
+let field_value = String::from("blue");
+
+let mut map = HashMap::new();
+map.insert(field_name, field_value); // here, field_name and field_value ownership transfer into map
+#+end_src
+- above, we've inserted actual values into the hash map
+- if we were to insert references instead, the values they refer to would remain outside, but must remain valid for at leastr as long as the  hash map. This we will cover more in ch. 10
+
+** Accessing values in a hash map
+- the ~get()~ method can be used to get values from a hash map
+#+begin_src rust
+ use std::collections::HashMap;
+
+let mut scores = HashMap::new();
+
+scores.insert(String::from("blue"), 10);
+scores.insert(String::from("yellow"), 50);
+
+let team_name = String::from("blue");
+let score = scores.get(&team_name); // borrow syntax to access score
+
+// accessing using a reference via &
+for (key, value) in &scores {
+    println!("{}:{}", key, value);
+}
+#+end_src
+- when we access ~score~, we get back the type ~Some(&i10)~
+- this is because get returns an ~Option<&V>~
+- what this allows is for us to cover the behavior for the case in which a value is requested from a hashmap that is not actually in the map
+- iterating over a hash map will print pairs in an arbitrary order, because the hash map is not ordered?
+
+** updating a hash map
+- HashMaps can grow
+- each Key can only have one Value associated with it at a time, but this can be updated. You could:
+  - replace the old value
+  - keep the old value and only add a new value if the key does not already have a value
+  - combine the old and new values
+
+*** overwriting a value
+#+begin_src rust
+use std::collections::HashMap;
+
+let mut scores = HashMap::new();
+
+scores.insert(String::from("Blue"), 10);
+scores.insert(String::from("Blue"), 25);
+
+println!("{:?}", scores); // reminder of the debug syntax for diplay trait
+#+end_src
+- pretty straightforward
+
+*** only inserting a value if the key has no value
+#+begin_src rust
+use std::collections::HashMap;
+
+let mut scores = HashMap::new();
+scores.insert(String::from("Blue"), 10);
+
+// here we use the 'entry' method
+
+scores.entry(String::from("Yellow")).or_insert(50);
+scores.entry(String::from("Blue")).or_insert(50);
+
+println!("{:}", scores);
+#+end_src
