@@ -152,7 +152,7 @@ let row = vec![
 - appending and updating ~String~
 -
   
-    
+  
 ** String::from and "<x>".to_string()  both create ~String~ from a string literal
 
 ** s.push() can only append single character to a ~String~

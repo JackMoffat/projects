@@ -14,6 +14,9 @@ let
 in
   pkgs.mkShell rec {
     buildInputs = with pkgs; [
+      llvmPackages_latest.llvm
+      llvmPackages_latest.bintools
+      llvmPackages_latest.lld
       rust-bin.stable.latest.default
       rust-analyzer
       xorg.libX11
@@ -22,15 +25,15 @@ in
       #rustc
       #rustup
       # cargo
-      #llvmPackages_latest.bintools
+      llvmPackages_latest.bintools
       #zlib.out
       #xorriso
       #grub2
-      #llvmPackages_latest.lld
+      llvmPackages_latest.lld
     ];
     #RUSTC_VERSION = pkgs.lib.readFile ./rust-toolchain;
     # https://github.com/rust-lang/rust-bindgen#environment-variables
-    #LIBCLANG_PATH= pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_latest.libclang.lib ];
+    LIBCLANG_PATH= pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_latest.libclang.lib ];
     HISTFILE=toString ./.history;
     # I added the export cargo line below
     # the export PATH should fail. but wait, now I do have a .cargo?
@@ -44,9 +47,4 @@ in
       #export PATH=$PATH:~/.cargo/bin
       #export PATH=$PATH:~/.rustup/toolchains/$RUSTC_VERSION-x86_64-unknown-linux-gnu/bin/
       '';
-    # Add libvmi precompiled library to rustc search path
-    #RUSTFLAGS = (builtins.map (a: ''-L ${a}/lib'') [
-    #  pkgs.libvmi
-    #]);
-    # Add libvmi, glibc, clang, glib headers to bindgen search path
   }
