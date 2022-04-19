@@ -45,14 +45,22 @@ def find_date(filename):
 # the remaining numbers in the string by the end of find_date could
 #   represent dates, times, or nothing I can interpret
 
+# oh crap, I could have hurt it by not safely clearing new_filename
+overwrite_protection_str = 0
 for filename in os.listdir(os.getcwd()):
     date_string, time_string, remaining_text = None, None, None
     date_string, time_string, remaining_text = find_date(filename)
+    new_filename = None
     if date_string:
-        extension = filename.split(".")[-1]
-        new_filename = "{0}_{1}_{2}.{3}".format(date_string, time_string, remaining_text, extension)
-        print(new_filename)
+        if True or date_string.replace("-","") in filename:
+            extension = filename.split(".")[-1]
+            new_filename = "{0}_{1}_{2}_{3}.{4}".format(date_string, time_string, remaining_text, overwrite_protection_str, extension)
+            print(new_filename)
+            # running this blew up a lot of screenshots, but only screenshots I think. What it shows though is that each file should have a unique addon during the rename for safety
+            #os.rename(filename, new_filename)
+            overwrite_protection_str += 1
+            pass
         pass
     else:
-        print(filename)
-    pass
+        #print(filename)
+        pass
