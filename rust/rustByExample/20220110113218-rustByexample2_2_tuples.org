@@ -1,0 +1,119 @@
+#+title: 2021-01-10rustByExample2-2-tuples
+#+roam_tags: unprocessed rust
+#+PROPERTY: header-args:rust :exports code :tangle t
+* Tuples
+  :LOGBOOK:
+  CLOCK: [2022-01-10 Mon 11:32]--[2022-01-10 Mon 12:41] =>  1:09
+  :END:
+
+  - tuples can hold values of different types.
+  - constructed with =()=
+  - can hold any number of values
+  - the tuple itself is a "value w/ a type signature =(T1, T2, ...)" where T1/etc are the types of the members
+  - functions can use tuples to return multiple values
+  - also can be used as arguments to functions
+#+begin_src rust
+  fn reverse(pair: (i32, bool)) -> (bool, i32) {
+      // let binds tuple members to variables
+      let (integer, boolean) = pair;
+
+      // so, the returns are defined by the return arrow above
+      (boolean, integer) // so do functions not need explicit return statements? nifty
+  }
+
+  // struct below is for the activity
+  #[derive(Debug)] // auto-derives the debug structure for the Struct immediately beneath
+  struct Matrix(f32, f32, f32, f32):
+
+  fn main() {
+      // good god that's a lot of types in the tuple
+      let long_tuple = (1u8, 2u16, 3u32, 4u64,
+                        -1i8, -2i16, -3i32, -4i64,
+                        0.1f32, 0.2f64,
+                        'a',
+                        true);
+      // extract values from tuple via tuple indexing
+      // so, indexing is done by a period and starts from zero
+      println!("long tuple first value {}", long_tuple.0);
+      println!("long tuple first value {}", long_tuple.1);
+
+      // you can nest tuples
+      let tuple_of_tuples = ((1u8,2u16,2u32),(4u64,-1i8),-2i16);
+
+      // you can print tuples, as long as they aren't too long
+      println!("tuple of tuples {:?}", tuple_of_tuples); // using the debug syntax
+      // when does a tuple become too long? 
+      // tuples can only be a max of 12 items long
+
+      let pair = (1,true);
+      println!("pair is {:?}",pair);
+      println!("reversed pair: {?}",reverse(pair));
+
+      // one element tuples can also be made, by putting a comma after the element
+      println!("one element tuple: {:?}", (5u32,));
+
+      // tuples can also be destructured to make bindings
+      let tuple = (1, "hello", 4.5, true);
+      let (a,b,c,d) = tuple;
+      println!("{:?}, {:?}, {:?}, {:?}", a, b, c, d);
+
+      let matrix = Matrix(1.1,1.2,2.1,2.2);
+      println!("{:?}", matrix);
+  }
+
+#+end_src
+* activity
+  1. add the ~fmt::Display~ trait to the =Matrix= struct in above, so that fi you switch from printing debug to display you see the following output:
+     ( 1.1 1.2 )
+     ( 2.1 2.2 )
+  2. add a =transpose= function using the =reverse= fn as template, which takes a matrix and returns one in which two elements have been swapped -> like an actual transpose
+#+begin_src rust
+  use std::fmt;
+
+  impl fmt::Display for Matrix {
+      fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+          // so now create a buffer that outputs them as we want
+          // f is the buffer
+          // opening bracket
+
+          // that ? operator will be important?
+
+          // // body attempt 1
+          // write!(f, "(")?;
+          // for (count, e) in elem.iter().enumerate() {
+          //     if count != 0 { write!(f," ")?; } // put a space
+          //     write!(f,"{}",e)?; // again with the qn marks
+          // }
+          // write!(f,")"); // does this line not need a question mark?
+      }
+  }
+#+end_src
+
+
+** 1. brute force way
+   There's definitely a much more elegant way to do this with a lambda or counter
+   But, I guess ~Matrix~ will never be variable-length so it's ok.
+
+   The better way to do this one would be to have it repeat the structural bit for N times based on the length of the array
+   #+begin_src rust
+     use std::fmt;
+     impl fmt::Display for Matrix {
+         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+             writeln!(f, "( {} {} )", self.0, self.1);
+             writeln!(f, "( {} {} )", self.2, self.3)
+         }
+    
+     }
+   #+end_src
+
+
+
+   
+** 2. transpose function
+   so, it works but it's pretty brute-forcey
+   #+begin_src rust
+     fn transpose(M: Matrix) -> Matrix {
+         let matrix_out = Matrix(M.0, M.2, M.1, M.3);
+         matrix_out
+     }
+   #+end_src

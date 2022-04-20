@@ -5,6 +5,7 @@
       llvmPackages_latest.bintools
       rustc
       cargo
+      rls
       # zlib.out
       rustup
       # xorriso

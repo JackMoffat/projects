@@ -1,0 +1,57 @@
+#+title: 2022-01-10rustByExample2-1LiteralsOperators.org
+#+roam_tags: unprocessed rust
+#+PROPERTY: header-args:rust :session *rust*
+
+* Literals and Operators
+  :LOGBOOK:
+  CLOCK: [2022-01-10 Mon 10:45]--[2022-01-10 Mon 11:31] =>  0:46
+  :END:
+  
+- ~integers, floats, chars, strings, bools~, and this unit type thingy ~()~ can be expressed at literus
+- ~ints~ can also be expressed with hex, octal, or binary notations
+  - hex = ~0x~,
+  - octal = ~0o~,
+  - binary = ~0b~
+  - Qn: why or when bother use these?
+  -
+    
+* underscores in literals
+  to improve readability for things like large ass numbers or decimals, can separate the numeric literal and have no effect other than visually to the code
+  - 1000000 becomes 1_000_000
+  - 0.0000001 becomes 0.000_000_1
+  - 
+
+* compiler needs to know the =type= of the literal
+  so, we need to describe whether it is a =u32= or a =i32= for instance
+
+  
+* operators
+  link: [[https://doc.rust-lang.org/reference/expressions.html#expression-precedence][Expressions - The Rust Reference]] 
+
+#+begin_src rust
+  fn main() {
+      // integer adingus
+      println!("1 + 2 = {}", 1u32 + 2); // so here is the type of 2 inferred from 1?
+      println!("1 - 2 = {}", 1i32 - 2); // here if change from i32 to u32,
+      // ^ if you change this from 1i32 to 1u32, you get an error that informs you about how trying to compute the previous would yield an overflow error.
+  }
+#+end_src
+
+* Bitwise operations
+  what the hell is going on down here?
+  Thank god, apparently it's very rare that we'd need to do bitwie operations
+  apparently it can reduce compile times, but compilers are decent at recognizing when this needs to be done themselves
+  #+begin_src rust
+    // Bitwise operations
+    println!("0011 AND 0101 is {:04b}", 0b0011u32 & 0b0101);
+    println!("0011 OR 0101 is {:04b}", 0b0011u32 | 0b0101);
+    println!("0011 XOR 0101 is {:04b}", 0b0011u32 ^ 0b0101);
+    println!("1 << 5 is {}", 1u32 << 5);
+    println!("0x80 >> 2 is 0x{:x}", 0x80u32 >> 2);
+
+    // Use underscores to improve readability!
+    println!("One million is written as {}", 1_000_000u32);
+  #+end_src
+  Ok, so here is [[https://stackoverflow.com/questions/141525/what-are-bitwise-shift-bit-shift-operators-and-how-do-they-work][a helpful link for bitwise shift operators]] 
+  This is definitely beyond what we need to know right now. 
+

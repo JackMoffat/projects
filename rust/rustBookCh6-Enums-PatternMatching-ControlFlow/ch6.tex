@@ -1,0 +1,501 @@
+% Created 2022-04-20 Wed 11:30
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{Jack M}
+\date{\today}
+\title{}
+\hypersetup{
+ pdfauthor={Jack M},
+ pdftitle={},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 27.2 (Org mode 9.5.2)}, 
+ pdflang={English}}
+\begin{document}
+
+\tableofcontents
+
+\section{6 Enums and pattern matching}
+\label{sec:org5d5bd09}
+\begin{itemize}
+\item enums - enumerations
+\item allow you to define a type by enumerating it's possible
+\end{itemize}
+
+\subsection{chapter goals}
+\label{sec:orge864273}
+\begin{itemize}
+\item show what enums are
+\item then explore the \texttt{option} enum
+\item then pattern matching w/ \texttt{match}
+\item then, \texttt{if / let}
+\end{itemize}
+
+\section{6.1 defining an enum}
+\label{sec:org90e6ea5}
+\begin{itemize}
+\item here's an example where enums may be more useful than structs
+\item since there are two possible types of IP address that we could come across, we can enumerate those possibilities
+\end{itemize}
+\begin{verbatim}
+enum IpAddrKind {
+    V4,
+    V6,
+}
+\end{verbatim}
+
+
+\subsection{enum values}
+\label{sec:orge9778e1}
+\begin{verbatim}
+let four = IpAddrKind::V4;
+let six = IpAddrKind::V6;
+
+fn route(ip_kind: IpAddrKind) {}
+\end{verbatim}
+\begin{itemize}
+\item so, subtypes of an enum are accessible using the double colon syntax - that is how they are namespaced
+\item now we can create functions that take either \texttt{type}, because the type of each is \texttt{IpAddrKind}
+\end{itemize}
+
+
+\subsection{ok, so now combining enums and structs}
+\label{sec:orgec4ef8e}
+\begin{itemize}
+\item wow, this seems quite useful in order to associate the address w/ the type of enum
+\end{itemize}
+\begin{verbatim}
+struct IpAddr {
+    kind: IpAddrKind,
+    address: String,
+}
+
+let home = IpAddr {
+    kind: IpAddrKind::V4,
+    address: String::from("127.0.0.1"),
+};
+
+let loopback = IpAddr {
+    kind: IpAddrKind::V6,
+    address: String::from("::1"),
+};
+
+\end{verbatim}
+
+\subsection{however, this can be done just by an enum!}
+\label{sec:org69d68e1}
+\begin{itemize}
+\item to do this, we define that each of the enum variants will have a \texttt{String} associated with it
+\end{itemize}
+\begin{verbatim}
+enum IpAddr {
+    V4(String),
+    V6(String),
+}
+
+let home = IpAddr::V4(String::from("127.0.0.1"));
+let loopback = IpAddr::V6(String::from("::1"));
+\end{verbatim}
+\begin{itemize}
+\item this way, we don't need to define the additional struct to hold the address data!
+\end{itemize}
+
+
+
+\subsection{enum variant types can have different types and amounts of associated data}
+\label{sec:orgd973af4}
+\begin{itemize}
+\item ok so watch this flexibilitym, that would not be possible with a struct
+\item IPv4 addresses always have four sets of three numbers in [0,255]
+\item if we wanted to store those four numbers themselves and still store the V6 address as a string, we could do the following
+\item 
+\end{itemize}
+\begin{verbatim}
+enum IpAddr {
+    V4(u8, u8, u8, u8),
+    V6(String),
+}
+
+let home = IpAddr::V4(127, 0, 0, 1);
+let loopback = IpAddr::V6(String::from("::1"));
+\end{verbatim}
+
+
+\subsection{working with IP addresses is so common  that the \texttt{std} library contains a definition for them}
+\label{sec:org235cbb2}
+\href{https://doc.rust-lang.org/std/net/enum.IpAddr.html}{IpAddr in std::net - Rust} 
+\begin{itemize}
+\item so the way it's implemented there is that there ARE structs for Ipv4Addr and Ipv6Addr, with are then included in the \texttt{enum} \texttt{IpAddr}
+\item one thing is that since we haven't brought \texttt{stdlib} into scope, we can define our own versions no problem
+\item 
+\end{itemize}
+
+\subsection{message enum demonstrating storage of different}
+\label{sec:orgc2630d6}
+
+\begin{itemize}
+\item quit: has no data associated with it
+\item move: has named fields like a struct
+\item Write: has one String value
+\item ChangeColor: three i32's
+\end{itemize}
+\begin{verbatim}
+// as an enum
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32,i32,i32),
+}
+
+// the equivalent structs
+struct QuitMessage; // unit struct
+struct MoveMessage {
+    x: i32,
+    y: i32,
+}
+struct WriteMessage(String); // tuple struct
+struct ChangeColorMessage(i32, i32, i32); // tuple struct
+
+\end{verbatim}
+
+\subsection{we can define methods on \texttt{enums} using \texttt{impl}}
+\label{sec:org612e271}
+\begin{verbatim}
+impl Message {
+    fn call(&self) {
+        // ma method body
+    }
+}
+
+let m = Message::Write(String::from("hello"));
+m.call();
+\end{verbatim}
+\begin{itemize}
+\item in the example above, we are showing that \texttt{m} is the \texttt{Write} variant of the \texttt{Message} enum
+\end{itemize}
+
+\subsection{The \texttt{Option} Enum and its Advantages Over Null Values}
+\label{sec:orga75aff2}
+\begin{itemize}
+\item \texttt{Option} is another enum define in the standard library
+\item this enum is so common that it, AND its variants, are "included in the prelude" -> you don;t have to explicitly import them
+\begin{itemize}
+\item Aka you can call \texttt{Some}, \texttt{None} without the \texttt{Option} prefix
+\end{itemize}
+\item The \texttt{Option} enum covers the situation where a value may be something, or it may be nothing
+\item the advantage to covering this very common situation in this way as opposed to using Null is that the compiler is able to check all cases before compilation
+\item aka, avoids tons of errors that are possible due to the way the Null type is usually implemented
+\end{itemize}
+
+\subsubsection{the concept of null is good}
+\label{sec:org27cb604}
+Null values handle the situation in which a value is either absent or invalid
+The implementation problem is that when a null value is used as a non-nul value, errors will result
+
+\subsubsection{The \texttt{Option} Enum}
+\label{sec:orge607bef}
+\begin{verbatim}
+enum Option<T> {
+    None,
+    Some(T),
+}
+\end{verbatim}
+\subsubsection{the <T> syntax and the type differences it causes}
+\label{sec:org1b6c3ea}
+\begin{itemize}
+\item so, the variants are of the type \texttt{Option<T>}
+\item the \texttt{T} is a "generic type parameter" -> more in ch. 10
+\item "for now, all you need to know is that \texttt{<T>} means the \texttt{Some} variant of the \texttt{Option} enum can hold one piece of data at any time, and that each concrete type that gets used in palce of \texttt{T} makes the overall \texttt{Option<T>} type a different type"
+\end{itemize}
+\begin{verbatim}
+let some_number = Some(5); // type is Option<i32>
+let some_string = Some("a string"); // type is Option<&str>
+
+let absent_number: Option<i32> = None; 
+\end{verbatim}
+\begin{itemize}
+\item we \textbf{annotate the type} for the example of \texttt{absent\_number} above, because rust can't infer from the \texttt{None} value that we want the type of \texttt{absent\_number} to be \texttt{Option<i32>}
+\item effectively what will get returned from the examples below are values of the type \texttt{Option<<whatever type>>}, instead of just \texttt{<Type>}
+\end{itemize}
+
+\begin{verbatim}
+let x: i8 = 5;
+let y: Option<i8> = Some(5);
+
+let sum = x + y;
+\end{verbatim}
+\begin{itemize}
+\item this is where the error will be: can't add an \texttt{i8} to an \texttt{Option<i8>}
+\item "in short, because they are different types, the compiler won't let us use an \texttt{Option<T>} \emph{as if it were definitely a valid value}"
+\end{itemize}
+\subsubsection{why have this variation in type?}
+\label{sec:org11af394}
+\begin{itemize}
+\item we have this difference because it allows us to compare whether a value is safe, and will always exist, or whether there may or may not be a value there
+\end{itemize}
+\subsubsection{{\bfseries\sffamily TODO} rewrite this section}
+\label{sec:org40620eb}
+\begin{itemize}
+\item eliminating the rrisk of incorrectly assuming a not-null value helps you to be more confident in your code. In order to have a value that can possibly be null, you must explicitly opt-in by making the type of that value \texttt{Option<T>}
+\end{itemize}
+\subsubsection{so, how do you get the \texttt{T} value out of a \texttt{Some} variant?}
+\label{sec:org01ffc03}
+\begin{itemize}
+\item \texttt{Option<T>} has a very large number of available methods
+\item they will be extremely useful
+\item highly recommended to check out the  \href{https://doc.rust-lang.org/std/option/enum.Option.html}{documentation for \texttt{Option<T>} methods}
+\end{itemize}
+\subsubsection{To use \texttt{Option<T>} values (in general), you must have code to handle each variant}
+\label{sec:org4c9bbf4}
+\begin{itemize}
+\item you want code for if you have a \texttt{Some(T)} value that is able to use the inner \texttt{T}
+\item you want code for if you have a \texttt{None} value, "and that code doesn't have a \texttt{T} value available.
+\item ooh here we go, the \texttt{Match} expression!
+\end{itemize}
+\section{6.2 the \texttt{match} control flow construct}
+\label{sec:org5477fd0}
+\begin{itemize}
+\item match allows comparison of values against a series of patterns, and then to execute code based on the match.
+\item main benefit here is that the compiler is able to confirm that all possible cases have been handled
+\end{itemize}
+\subsection{example}
+\label{sec:org7e42f44}
+\begin{verbatim}
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter,
+}
+
+
+fn value_in_cents(coin: Coin) -> u8 {
+    match coin {
+        Coin::Penny => {
+            println!("lucky penny!!!!");
+            1},
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin::Quarter => 25,
+    }
+}
+\end{verbatim}
+\begin{itemize}
+\item new syntax: the pattern and the code in the match arm are separated by \texttt{=>}
+\item the number (5,10,25) is the code to be run
+\item the first match shows how we execute multiple lines of code within a \texttt{match} arm: we enclose it withinc urly brackets
+\end{itemize}
+\subsection{patterns that bind to values}
+\label{sec:org54a7572}
+\begin{itemize}
+\item "Another useful feature of match arms is that they can bind to the parts of the  values that match the pattern"
+\item since it binds to the parts of the values, they can extract values from \texttt{enum} variants
+\end{itemize}
+\begin{itemize}
+\item the pretext for the example below is that US states had specific back side variant pictures, so we've added a value called \texttt{UsState} to be contained within the \texttt{Quarter} variant of an enum
+\begin{verbatim}
+#[derive(Debug)]
+enum UsState {
+    Alabama,
+    Alaska,
+    // --more states--
+}
+
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(UsState),
+}
+
+
+fn value_in_cents(coin: Coin) -> u8 {
+    match coin {
+        Coin::Penny => 1,
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin::Quarter(state) => {
+            println!("State quarter from {:?}!", state);
+            25
+        }
+    }
+}
+
+\end{verbatim}
+\item so in the updated \texttt{value\_in\_cents} fn, now the passed-in value of \texttt{Coin::Quarter(UsState::Alaska)}, \texttt{coin} would proceed until it reaches \texttt{Coin::Quarter(state)}
+\item then, \texttt{state} is \texttt{UsState(Alaska)}, which is accessible to the \texttt{println!} macro
+\end{itemize}
+\subsection{Matching with \texttt{Option<T>}}
+\label{sec:orgc43e788}
+\begin{itemize}
+\item "instead of comparing coins, we'll compare the variants of \texttt{Option<T>} but the way the match expression works remains the same"
+\begin{itemize}
+\item goal of the above is to get the inner \texttt{T} value out of a \texttt{Some} case <- I don't remember doing this in the previous section?
+\end{itemize}
+\item ah right, \texttt{Some} and \texttt{None} are variants of the \texttt{Option} enum that are automatically imported during the prelude because of how common they are ,\_ and \texttt{Some} / \texttt{None} are both accessible without prefixing.
+\end{itemize}
+\begin{verbatim}
+fn plus_one(x: Option<i32>) -> Option<i32> {
+    match x {
+        None => None,
+        Some(i) => Some(i + 1),
+
+    }
+}
+let five = Some(5); // an enum of type ~Option<i32>~
+let six = plus_one(five);
+let none = plus_one(None);
+\end{verbatim}
+\begin{itemize}
+\item here, the variable within \texttt{plus\_one} is Some(5). When that matches the Some(i) arm, it will then bind 5 to i and return the value 6
+\item in the case with \texttt{None}, it matches \texttt{None} and returns \texttt{None}
+\end{itemize}
+\subsubsection{matches are sequential, and they will throw errors at compile time if you've put a catch-all arm before a more specific arm}
+\label{sec:org7d0fc47}
+
+\begin{itemize}
+\item in the previous code block, had we not included a pattern to deal with \texttt{None} (aka, when a value is not present), the code would not have compiled
+\item this is an example of Rust catching all the possible cases at compile-time
+\item "..Rust prevents us from forgetting to explicitly handle the \texttt{None} case, it protects us from assuming we have a value when we might have null..", thus preventing the billion-dollar mistake
+\end{itemize}
+\subsubsection{Catch-All Patterns And The \_ Placeholder}
+\label{sec:org6b139f7}
+\begin{itemize}
+\item if you roll a three, specific action
+\item if you roll a seven, specific action
+\item otherwise, you move a certain number of spaces in some imaginary game
+\begin{itemize}
+\item for that last arm, have we just \emph{named} it other or is other a special word?
+\end{itemize}
+\item and we are USING the value passed as other in this case
+\item when we dont wan't to \emph{use} the value that may be present in other, we can use the catch-all pattern \_\textasciitilde{}
+\item \texttt{\_} will match any value and then \textbf{not bind to that value}
+\item this way, rust won't warn us about an unused variable
+\item say if we want the player to have to reroll when they don't roll a 3 or a 7, we can use the \texttt{\_} operator instead of \texttt{other} because we don't care about the value and want it thrown away, OR if we want it to just do nothing aka pass the player's turn, we can do that using the unit value \texttt{()}
+\end{itemize}
+\begin{verbatim}
+let dice_roll = 9;
+match dice_roll {
+    3 => add_fancy_hat(),
+    7 => remove_fancy_hat(),
+    other => move_player(other), // using the value
+    _ => reroll(), // calling a function that does not use the value because _ throws it away
+    _ => (), // doing nothing whatever by passing the unit value and not using the value because _ throws it away
+}
+
+
+fn add_fancy_hat() {}
+fn remove_fancy_hat() {}
+fn move_player(num_spaces: u8) {}
+fn reroll() {}
+\end{verbatim}
+\subsection{next up: concise control flow with \texttt{if let}}
+\label{sec:org4ae7333}
+\section{6.3 Concise Control Flow With \texttt{If Let}}
+\label{sec:org19f304c}
+The \texttt{if let} syntax - more concise way to match one pattern to control the rest
+
+\subsection{if vs match}
+\label{sec:orgdda7599}
+\subsubsection{match}
+\label{sec:org4db8bec}
+\begin{itemize}
+\item the block below shows code where a \texttt{match} only executes code when a value is \texttt{Some}
+\item (as a side note, the value of Some here is 3 and it's type is u8)
+\end{itemize}
+\begin{verbatim}
+let config_max = Some(3u8);
+match config_max {
+    Some(max) => println!("The maximum is configured to be..... {}", max)
+        _ => (), 
+}
+\end{verbatim}
+\begin{itemize}
+\item the \texttt{\_ => ()} line satisfies the match expression, but is basically boilerplate
+\end{itemize}
+
+\subsubsection{match - interesting syntax}
+\label{sec:org88db0fc}
+here's how we can do it more concisely with \texttt{if let}
+\begin{itemize}
+\item the code in this \texttt{if let} expression will only run if the value is
+\end{itemize}
+\begin{verbatim}
+let config_match = Some(3u8);
+if let Some(max) = config_max { // this seems syntacticall odd / almost reversed to me but that's ok
+    println!("the max is configured to be {}", max);
+}
+
+\end{verbatim}
+\begin{itemize}
+\item so in the if, it's basically saying \textbf{if} the type of the value it is given is Some(<x>), then execute the code in the brackets
+\item oh, jimbus. Thanks Matt for the explanation - we're literally just combining the if and the let. we use let all the time for assignment anyways
+\item within that expression, the value of \texttt{max} will be whatever was within the \texttt{Some(<x>)} type it was originally given
+\item Ah, because the \texttt{if let} takes:
+\begin{enumerate}
+\item First, a pattern
+\item then, the expression to use
+\end{enumerate}
+\item this way, the expression is given to \texttt{match}
+
+\item Advantage to \texttt{if let} is shorter, less typing, easier to take
+
+\item disadvantage is that you lose the "exhaustive type checking that \texttt{match} enforces"
+
+\item 
+\end{itemize}
+
+\subsubsection{you can also include \texttt{else} with \texttt{if let}}
+\label{sec:org4b60506}
+\begin{itemize}
+\item here, the \texttt{else} code is equivalent to the \texttt{\_ => <code>} in the full match expression
+here's how we'd write something to count all non-quarter coins, using the \texttt{Coin} enum we made earlier
+\end{itemize}
+\begin{verbatim}
+let mut count = 0;
+match coin {
+    Coin::Quarter(state) => println!("state quarter from {:?}!!!", state),
+    _ => count += 1,
+}
+\end{verbatim}
+\begin{itemize}
+\item and here's how we'd do it with \texttt{if let else}
+\end{itemize}
+\begin{verbatim}
+let mut count = 0;
+if let Coin::Quarter(state) = coin {
+    println!("STATE QUARTER WOOO from {:?}", state);
+} else {
+    count += 1;
+}
+\end{verbatim}
+
+\subsubsection{summmary}
+\label{sec:org6f7066c}
+"If you have a situation in which your program has logic that is too verbose to express using a \texttt{match}, remember that \texttt{if let} is in your rust toolbox as well"
+We've shown:
+\begin{itemize}
+\item creating custom \texttt{enum} types
+\item how standard library's \texttt{Option<T>} can be used to prevent errors with potential values
+\item using \texttt{match}, and \texttt{if let} to extract values
+\item 
+\end{itemize}
+"Your Rust programs can now express concepts in your domain using structs and enums."
+Creating custom types in the API ensures type safety <- lets the compiler help ye out
+
+\subsubsection{Next up: organizing through modules}
+\label{sec:org5ed98b8}
+\end{document}

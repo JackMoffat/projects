@@ -1,0 +1,126 @@
+#+title: rustBookCh2
+#+date: <2022-01-14 Fri 09:53> 
+#+roam_tags: rust unprocessed
+#+PROPERTY: header-args:rust :dir ~/projects/rust/testerino
+* book ch 2 
+** 09:50 starting coding with Reddoh
+   :LOGBOOK:
+   CLOCK: [2022-01-14 Fri 10:22]--[2022-01-14 Fri 11:09] =>  0:47
+   CLOCK: [2022-01-14 Fri 09:58]--[2022-01-14 Fri 10:22] =>  0:24
+   CLOCK: [2022-01-14 Fri 09:53]--[2022-01-14 Fri 09:58] =>  0:05
+   :END:
+   later than expected because I couldn't find the hood latch on the car to refill washer fluid. 
+
+** [[https://doc.rust-lang.org/book/ch02-00-guessing-game-tutorial.html][programming a guessing game]] 
+
+   - created a new project by setting nix-shell and doing ~cargo new guessing_game~
+   - this created =Cargo.toml= and =src/=
+   - getting error like "no such file or directory, rls" when I go into this directory?
+   - I removed my customizations in the copied rustup nix-shell template, and it seems to be working now
+   - ok, so I did =cargo run= and it ran it. Apparently cargo run is good for rapidly iterating through things
+   
+** processing a guess
+   
+   so, ~use std::io~ imports the io library from the std library
+
+   
+
+** storing values w variables
+   - let is used to create a variable
+   - variables are /immutable/ by default, they have to specifically be delcared mutalbe
+   - the ~String::new()~ bit creates a new empty instance of a string variable
+     - "here's a variable, you're gonna have a string, you don't have one yet"
+   - ~io::stdin()~ is the ~stdin()~ function from the =io= library
+   - we could alternately access this function by calling std::io::stdin, if we hadn't put the ~use std::io~ line at the top
+   - ~.read_line(&mut guess)~: we are calling the =method= ~read_line~ with one argument, ~&mut guess~
+     - ~read_line~ takes whatever is typed into the standard input, and appends that to the string NOT overwrite. Therefore, the string argument needs to be mutable.
+     - ~&~ is a *reference* : allows different parts of your code to access the same value without needing to copy it into memory again
+     - for now, we won't need to know too much except that by default, references are immutable (like variables)
+       - that's why we need to write ~&mut guess~, and not just ~&guess~
+         
+** handling potential failures with the Result type
+   - so re: how this code is on 3 lines, that's just to make it easier to read.
+   - the ~read_line~ method returns a value of type ~io::Result~
+   - there are many different types named ~Result~, including just ~Result~ by itself (the default)
+   - =Result= types are /enumerations/ (enums). -> will be covered more in ch.6
+   - /enums/ can have fixed sets of values, known as /variants/
+   - ~Result~'s variants are ~Ok~ and ~Err~
+     - ~Err~ means operation failed, and ~Ok~ means it succeeded
+   - ~Result~ types are meant to include information about how errors are handled
+   - the ~.expect~ method will crash the program and display a message if the ~io::Result~ is an ~Err~
+   - if Result return an Err at the level of ~.read_line~, it probably means an issue with the OS itself. think emacs' simulated terminals and stdin access
+   - if ~.expect~ is ok, it returns the input
+
+
+   
+** <2022-01-15 Sat 10:14> some brief coding?
+   :LOGBOOK:
+   CLOCK: [2022-01-15 Sat 10:18]
+   :END:
+** this timer is for when we actually start coding
+** TODO Printing Values with println! placeholders
+   ok, so we've basically done this already
+** Generating a secret number
+** using crate to get more functionality
+   - so, here we will be importing and using the =rand= crate
+   - this is a /library/ crate: doesn't execute on it's own, is meant to be called by other programs
+   - we add this bad boy into cargo, in the dependencies section
+   - cargo uses *semantic versioning* - =0.8.3= as the version specifier actually means =^0.8.3=, which means at least =0.8.3= but below =0.9.0=
+   - so, before the next ....minor release?
+   - cargo.lock ensures one version of your packages are used
+   - if you want to upgrade the crate to a new version, use cargo update: this would change the lockfile
+   - 
+** generating a random number
+   - so we add some code that says =rand::threat_rng().gen_range(1..101)= to make the thang
+   - oh sick
+** cargo doc --open
+   super useful command! this will produce a browser view of the documentation for alll the dependencies you've included in your shit
+   - This is what you should use to look at how to actually code a bunch of the stuff
+   - 
+** gen_range()
+   - thread_rng is the specific thing we are using to generate the random number 
+   interesting! you could pass in (1..=100) instead of (1..101) to get the desired range!
+** comparing the guess to the secret number
+   - wait a sec, why are the substatements separated  by commas here now?
+   - =Ordering= is a new =type=
+   - =cmp= is a =method=
+   - =match= expressions are made up of =arms=
+     - I guess this makes sense
+   - there are mismatched type in here, however.
+   - reason being, we need to convert our input =String= into a number
+   - wait, so this guess bit is being /shadowed/?
+   - allows for variable name reuse instead of having to do some shit like guess and guess_str
+   - ok, shadowing often used for type conversions
+   - by specifying =let guess: u32=, we are giving information to the =parse()= method about what output we want
+   - =parse= returns a =Result= like read_line does, which is why we can call expect on it (I think)
+   - 
+** allowing multiple guesses
+   - in the =Err(_)=, the underscore is a catch-all
+   - major change in the error handling is switching from =expect= to =match=
+* code tangling for later!!
+** main.rs
+   :PROPERTIES:
+   :header-args:rust: :tangle main.rs
+   :END:
+   
+*** libraries
+ #+begin_src rust
+   use std::io;
+ #+end_src
+
+
+ 
+*** main
+    #+begin_src rust
+      fn main() {
+          println!("guess the number!!!!!!!!!!!!!!!!!!!!!");
+          println!("please input your guess");
+
+          let mut guess = String::new(); // oh cool!
+
+          io::stdin()
+              .read_line(&mut guess)
+              .expect("Failed to read line");
+          println!("YOU GUEss ED: {}", guess);
+      }
+    #+end_src

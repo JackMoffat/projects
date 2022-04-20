@@ -1,0 +1,35 @@
+#+title: 2022-01-12rustBook
+#+date: <2022-01-12 Wed 09:58> 
+#+roam_tags: rust unprocessed
+* So, first day we are starting the book
+  :LOGBOOK:
+  CLOCK: [2022-01-12 Wed 10:00]
+  :END:
+* troubleshooting some of the rust install stuff for both me and matt
+* I made a nix shell following this template, in the "installation via rustup" part
+ [[https://nixos.wiki/wiki/Rust][rust template on nixos iwki]] 
+* got things to print hello world using nix shell
+* seeing whether it works with emacs
+  after running and adding direnv allow, I got error
+  #+begin_example
+    error: 'rls' is not installed for the toolchain 'nightly-2021-09-19-x86_64-unknown-linux-gnu'
+    To install, run `rustup component add rls --toolchain nightly-2021-09-19-x86_64-unknown-linux-gnu`
+
+    Process rls stderr finished
+    error: 'rls' is not installed for the toolchain 'nightly-2021-09-19-x86_64-unknown-linux-gnu'
+    To install, run `rustup component add rls --toolchain nightly-2021-09-19-x86_64-unknown-linux-gnu`
+
+    Process rls stderr finished
+  #+end_example
+  So, will try installing rustup in the nix-shell imperatively by running the command.
+  - [ ] how would I add this declaratively to the nix-shell? well, I haven't loked at it veyr much yet
+  - ok, so that seems to have worked
+* commands that are useful in emacs
+ =spacemacs/rust-quick-run= runs the boyo by rustc instead of compiling it
+* rustfmt
+  auto-formatting tool that can make ur code pretty if u want n stuff
+* <2022-01-13 Thu 11:13> Matt wasn't available this morning because he was sick, so I worked on this myself aka made sure it worked w emacs
+* <2022-01-13 Thu 11:12> After a lot of messing around, I've confirmed that cargo works well enough in emacs just by using the 'cargo x' commands by ~shell-command~
+  - going through ch01-03
+  - ~cargo build, cargo run, cargo check~ build the thing, run the thing, and confirm that it will build without building it respectively
+  - ~cargo build --release~ will build the code with optimizations

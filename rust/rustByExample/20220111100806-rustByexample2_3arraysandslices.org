@@ -1,0 +1,85 @@
+#+title: 2022-01-11rustByExample2-3ArraysAndSlices.org
+#+date: <2022-01-11 Tue 10:09> 
+#+roam_tags: rust unprocessed
+#+SEQ_TODO: QUESTION(q) | ANSWERED(a)
+
+* pre start notes
+  starting a bit later than normal here, but we got time
+* arrays and slices
+  :LOGBOOK:
+  CLOCK: [2022-01-11 Tue 10:08]
+  :END:
+  
+** arrays 
+   - arrays are collections of objects -> all have the same type =T=
+   - created using square brackets
+   - the length of the array is part of it's *type signature* ~[T; length]~
+     - the length is /known at compile time/
+     - so, arrays can't change size?
+** slices
+   - similar to arrays BUT: length isn't know at compile time
+   - "slices are two-word objects":
+     - word 1: a =pointer= to the data
+     - word 2: the length of the slice
+   - slices "borrow a section of an array", and have type signature =&[T]=
+*** QUESTION what is meant by "the word size is the same as usize" 
+    - I think here word size is meant at a level that is currently beyond what we need to know.
+    - probably relates to low-level implementation of the stuff on different devices ex. a raspberry pi vs. an MS-DOS computer vs my laptop
+* Code
+  #+begin_src rust
+    use std::mem;
+
+    // This function borrows a slice
+    fn analyze_slice(slice: &[i32]) {
+        println!("first element of the slice: {}", slice[0]);
+        println!("the slice has {} elements", slice.len());
+    }
+
+    fn main() {
+        // Fixed-size array (type signature is superfluous)
+        let xs: [i32; 5] = [1, 2, 3, 4, 5];
+
+        // All elements can be initialized to the same value
+        let ys: [i32; 500] = [0; 500];
+
+        // Indexing starts at 0
+        println!("first element of the array: {}", xs[0]);
+        println!("second element of the array: {}", xs[1]);
+
+        // `len` returns the count of elements in the array
+        println!("number of elements in array: {}", xs.len());
+
+        // Arrays are stack allocated
+        println!("array occupies {} bytes", mem::size_of_val(&xs));
+
+        // Arrays can be automatically borrowed as slices
+        println!("borrow the whole array as a slice");
+        analyze_slice(&xs);
+
+        // Slices can point to a section of an array
+        // They are of the form [starting_index..ending_index]
+        // starting_index is the first position in the slice
+        // ending_index is one more than the last position in the slice
+        println!("borrow a section of the array as a slice");
+        analyze_slice(&ys[1 .. 4]);
+
+        // Out of bound indexing causes compile error
+        println!("{}", xs[5]);
+    }
+  #+end_src
+** from playing with the code
+   so, if i do src_rust{println!("{}", ys)} nothing happens because 
+** QUESTION wait, so how exactly do you take a slice?
+** QUESTION why does analyze_slice inlcude the =&[i32]= there
+   - I get that it makes a slice,
+   - so is it in line 28 of the code that the slice gets created / slicified?
+   - ah, ok! so, to get back an array as a slice just by itself you can use ~let <x> = &<array>~
+
+     - the trait std::fmt::Display isn't automatically implemented when you try to call ~"{}"~ on an array
+
+* ending notes
+  - ok, so I feel like this will be gone into in much greater application soon - so far, we've seen how arrays and slices can be created
+  - I feel that it could be good to try the rust BOOK out for learning
+    
+
+    
