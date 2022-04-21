@@ -20,6 +20,13 @@ for elem in list {
 
 println!("{:?}",v);
 }
+// pseudocode:
+// 1.) sort the list
+// 2.) find the most common value (by number of times)
+
+// 1.) 
+//  I think there's a sort operation by default?
+//   use an incrementing hash map thing as described in ch8-3
     
 #+end_src
 
@@ -30,16 +37,7 @@ println!("{:?}",v);
  Keep in mind the details about UTF-8 encoding!
     
 * q3
-    Using a hash map and vectors, crelet
-  # Pinned nixpkgs, deterministic. Last updated: 2/12/21.
-  pkgs = import (fetchTarball("https://github.com/NixOS/nixpkgs/archive/a58a0b5098f0c2a389ee70eb69422a052982d990.tar.gz")) {};
-
-  # Rolling updates, not deterministic.
-  # pkgs = import (fetchTarball("channel:nixpkgs-unstable")) {};
-in pkgs.mkShell {
-  buildInputs = [ pkgs.cargo pkgs.rustc ];
-}
-ate a text interface to allow a user to add employee names to a department in a company. 
+    Using a hash map and vectors, create a text interface to allow a user to add employee names to a department in a company. 
  For example, “Add Sally to Engineering” or “Add Amir to Sales. 
 ” Then let the user retrieve a list of all people in a department or all people in the company by department, sorted alphabetically. 
 
