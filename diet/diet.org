@@ -1,0 +1,4 @@
+* progress
+* python code
+** TODO implement adjustment based on age, weight, body fat %
+** TODO implement 
